@@ -12,7 +12,6 @@ set(SOLS_CORE_HEADERS_LIBS
 		${INC_DIR}/core/SOLS_parserConf.hpp
 
 		${INC_DIR}/core/wesi/WESI.h
-		${INC_DIR}/core/wesi/WESI_cpp.hpp
 )
 
 set(SOLS_CORE_SOURCES_LIBS
@@ -20,7 +19,6 @@ set(SOLS_CORE_SOURCES_LIBS
 		${SRC_DIR}/core/SOLS_parserConf.cpp
 
 		${SRC_DIR}/core/wesi/WESI.c
-		${SRC_DIR}/core/wesi/WESI_cpp.cpp
 )
 
 set(SOLS_LIB_HEADERS_LIBS
