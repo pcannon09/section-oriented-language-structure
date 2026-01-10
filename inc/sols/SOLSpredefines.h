@@ -8,7 +8,7 @@
 #define INCLUDE_SOLS_SOLSPREDEFINES_HPP_
 
 // Project setup
-#define SOLS_DEFAULT_CPP_STD			201703L
+#define SOLS_DEFAULT_CPP_STD		202002L
 #define SOLS_DEFAULT_C_STD			201112L
 
 // Versioning
