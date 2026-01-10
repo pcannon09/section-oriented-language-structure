@@ -1,0 +1,176 @@
+/* tests/main.cpp
+ * Owned and created by: pcannon09
+ */
+
+#include <iostream>
+
+#include "../inc/macros.hpp"
+#include "../inc/Argx.hpp"
+
+std::string licenseStr = R"(ArgX  Copyright (C) 2025  pcannon09
+This program comes with ABSOLUTELY NO WARRANTY; for details type `./run.sh --help'.
+This is free software, and you are welcome to redistribute it
+under certain conditions; type `./run.sh --help' for details.)";
+
+int main(int argc, char *argv[])
+{
+#if defined(AS_PYTHON_PACKAGE)
+	std::cout << "FATAL: YOU SHOULD NOT RUN THIS EXECUTABLE AS `AS_PYTHON_PACKAGE`, DO NOT USE THE MACRO IF YOU ARE WILLING TO EXECUTE ARGX IN C++\n";
+
+	return -1;
+
+#else
+	std::string docStr;
+	
+	argx::Argx mainArgx("main-args", argc, argv);
+
+	// Setup mainArgx
+	{
+		argx::ARGXOptions helpOption;
+		argx::ARGXOptions versionOption;
+		argx::ARGXOptions styleOption;
+		argx::ARGXOptions helpTestOption;
+
+		helpOption.id = "help";
+		helpOption.param = "--help";
+		helpOption.sparam = "-h";
+		helpOption.info = "Show this help";
+		helpOption.hasSubParams = true;
+
+		versionOption.id = "version";
+		versionOption.param = "--version";
+		versionOption.sparam = "-v";
+		versionOption.info = "Show version message";
+		versionOption.hasSubParams = false;
+
+		styleOption.id = "style";
+		styleOption.param = "--style";
+		styleOption.sparam = "-s";
+		styleOption.info = "Set the style of the documentation (simple OR professional)";
+		styleOption.hasSubParams = true;
+		
+		argx::ARGXOptions versionSubOption;
+		argx::ARGXOptions messageSubOption;
+		argx::ARGXOptions styleSubOption;
+		
+		versionSubOption.id = "version";
+		versionSubOption.param = "version";
+		versionSubOption.sparam = "v";
+		versionSubOption.info = "Show version help";
+		versionSubOption.hasSubParams = false;
+		
+		messageSubOption.id = "message";
+		messageSubOption.param = "message";
+		messageSubOption.sparam = "m";
+		messageSubOption.info = "Show a specific message";
+		messageSubOption.defaultValue = "Hello world!";
+		messageSubOption.hasSubParams = false;
+
+ 		styleSubOption.id = "style-type";
+ 		styleSubOption.param = "simple";
+ 		styleSubOption.info = "Set simple documentation style";
+ 		styleSubOption.hasSubParams = false;
+
+		styleOption.subParams.push_back(styleSubOption);
+
+ 		styleSubOption.id = "style-type";
+ 		styleSubOption.param = "professional";
+ 		styleSubOption.sparam = "pro";
+ 		styleSubOption.info = "Set professional documentation style";
+ 		styleSubOption.hasSubParams = false;
+
+		styleOption.subParams.push_back(styleSubOption);
+
+		helpOption.subParams.push_back(versionSubOption);
+		helpOption.subParams.push_back(messageSubOption);
+
+		versionOption.subParams.push_back(versionSubOption);
+
+		mainArgx.add(helpOption);
+		mainArgx.add(versionOption);
+		mainArgx.add(styleOption);
+		
+		std::string msg = "Simple documentation on how to use the ARGX test";
+
+		std::cout << "HELP PARAM POSITION: " << (mainArgx.getArgPos(helpOption.param) < 0 ? mainArgx.getArgPos(helpOption.sparam) : mainArgx.getArgPos(helpOption.param)) << "\n";
+		std::cout << "STYLE PARAM POSITION: " << (mainArgx.getArgPos(styleOption.param) < 0 ? mainArgx.getArgPos(styleOption.sparam) : mainArgx.getArgPos(styleOption.param)) << "\n";
+		std::cout << "VERSION PARAM POSITION: " << (mainArgx.getArgPos(versionOption.param) < 0 ? mainArgx.getArgPos(versionOption.sparam) : mainArgx.getArgPos(versionOption.param)) << "\n";
+
+		if (mainArgx.getParam("style").exists)
+		{
+			if (mainArgx.getArgc() > mainArgx.getArgIDPos("style") + 1)
+			{
+				if (mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "simple")
+					docStr = mainArgx.createDocs(argx::ARGXStyle::Simple, "-- Docs ----", msg);
+
+				else if (mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "pro" ||
+						mainArgx.getMainArgs()[mainArgx.getArgIDPos("style") + 1] == "professional")
+					docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", msg);
+			}
+
+			else
+			{
+				std::cout << "Set one of those two values:\n";
+				std::cout << "* simple\n";
+				std::cout << "* professional\n";
+				std::cout << "NOTE: You can code your own documentation by overriding the Argx::createDocs() function\n";
+
+				return 1;
+			}
+		}
+		
+		else docStr = mainArgx.createDocs(argx::ARGXStyle::Professional, "-- Docs ----", msg);
+	}
+
+	// Check if help exists
+	if (mainArgx.getArgc() <= 1)
+	{
+		std::cout << docStr << "\n";
+
+		return 0;
+	}
+
+	if (mainArgx.getParam("help").exists)
+	{
+		argx::ARGXParam helpParam = mainArgx.getParam("help");
+
+    	if (mainArgx.getSubParam(helpParam, "version"))
+    		std::cout << "For more information, call the following parameter: `--version`\n";
+
+    	else if (mainArgx.getSubParam(helpParam, "message"))
+		{
+			int pos = mainArgx.getArgIDPos("help");
+
+			if (mainArgx.getArgc() > pos) std::cout << mainArgx.getSubValue("message")[0] << "\n";
+			else std::cout << "Enter a message in the third parameter as a string" << "\n";
+
+			return 0;
+		}
+
+		std::cout << docStr << "\n" << licenseStr << "\n";
+	}
+
+	if (mainArgx.getParam("version").exists)
+	{
+		std::cout << "ARGX Version information:\n";
+		std::cout << "Version: " << std::to_string(ARGX_VERSION_MAJOR) << "." << std::to_string(ARGX_VERSION_MINOR) << "." << std::to_string(ARGX_VERSION_PATCH) << " " << ARGX_VERSION_STATE << "\n";
+		std::cout << "Version Standard: " << std::to_string(ARGX_VERSION_STD) << "\n";
+		std::cout << "Development Type: " << (ARGX_DEV ? "DEV" : "PRODUCTION") << "\n";
+	}
+
+	if (!mainArgx.compareArgs(mainArgx.getOptions(), mainArgx.getMainArgs()))
+	{
+		int wrongArgPos = mainArgx.getWrongArgs(mainArgx.getMainArgs());
+
+		std::cout << argx::Argx::formatWrongArgs(wrongArgPos) << "\n";
+
+		std::cout << "[ ARGX ] Unknown option " << mainArgx.getMainArgs()[argx::Argx::formatWrongArgs(wrongArgPos)] << "\n";
+		std::cout << "[ ARGX ] Had a param error as " << (wrongArgPos >= 0 ? "normal parameter" : "sub parameter") << "\n";
+
+		return 1;
+	}
+
+	return 0;
+#endif // defined(AS_PYTHON_PACKAGE)
+}
+

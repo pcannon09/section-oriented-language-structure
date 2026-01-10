@@ -1,0 +1,23 @@
+# Auto Generated
+.cache/
+.private/*
+
+tmp/
+
+# Built files (Docs, build) and ignore system files
+build/
+docs/
+
+.DS_Store
+
+# Not needed files
+*.o
+*.obj
+*.tmp
+*.bak
+*.d
+*.swp
+
+# DO NOT IGNORE
+!.private/project.json
+

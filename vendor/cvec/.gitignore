@@ -1,0 +1,21 @@
+# PRIVATE
+.private/*
+!.private/project.json
+
+# GENERATED (CACHE, BUILD, ...)
+logs/
+build/
+.cache/
+docs/
+
+# FILES
+.bak
+.tmp
+.swp
+
+# OS
+.DS_Store
+
+# UTILITY FILES
+gitCommit.sh
+
