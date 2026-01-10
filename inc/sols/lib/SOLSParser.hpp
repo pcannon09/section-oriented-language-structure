@@ -4,6 +4,9 @@
 #include <string>
 #include <vector>
 #include <map>
+#include <functional>
+
+#include "../core/SOLS_parserConf.hpp"
 
 namespace sols
 {
@@ -16,6 +19,14 @@ namespace sols
 		std::vector<Node> children;
 	} Node;
 
+	typedef struct RegisteredName
+	{
+		std::string id;
+		std::string syntax;
+
+		std::function<ParseMessage(std::vector<std::string>)> call;
+	} RegisteredName;
+
 	typedef std::pair<bool, std::string> InitInfoError;
 
 	class Parser 
@@ -25,6 +36,9 @@ namespace sols
 		std::string input;
 
 		size_t pos;
+		size_t line;
+
+		std::vector<RegisteredName> regNames;
 
 	protected:
 		InitInfoError initErrorMsg;
@@ -46,10 +60,18 @@ namespace sols
 
 		Node parseElem();
 
+		RegisteredName getNameID(const std::string &id);
+
+		bool nameExists(const std::string &syntax);
+		bool registerName(const RegisteredName &name);
+
+		void exception(const unsigned int line, const unsigned int &pos, const std::string &text);
+
 		std::string parseName();
 		std::string parseStr();
 
 		std::string getID() const;
+		std::vector<RegisteredName> getNames() const;
 	};
 }
 

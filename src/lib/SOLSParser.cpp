@@ -7,6 +7,8 @@ extern "C"
 #	include "../../inc/sols/core/wesi/WESI.h"
 }
 
+#include <algorithm>
+
 namespace sols
 {
 	// PROTECTED //
@@ -49,7 +51,7 @@ namespace sols
 		{
 			std::string chstr(1, c);
 
-			wesi_throw(WESIType_Error, ciof::format("Unexpected token `%1`", chstr).c_str(), true);
+			wesi_throw(WESIType_Error, ciof::format("Expected token `%1`", chstr).c_str(), true);
 		}
 	}
 
@@ -86,9 +88,26 @@ namespace sols
 		return str;
 	}
 
+	void Parser::exception(const unsigned int line, const unsigned int &pos, const std::string &text)
+	{
+		std::string exceptMsg;
+		std::string sep = std::to_string(line) + "| ";
+
+		exceptMsg += sep + text;
+
+		exceptMsg += "\n";
+
+		for (size_t i = 0 ; i < sep.size() ; i++)
+			exceptMsg += "~";
+
+		exceptMsg += "^";
+
+		ciof::print(exceptMsg);
+	}
+
 	Node Parser::parseElem()
 	{
-		expect('<');
+		this->expect('<');
 
 		Node node;
 		node.name = this->parseName();
@@ -121,12 +140,17 @@ namespace sols
 		// Content inside the node
 		while (1)
 		{
+			// Get new line char to add a new line to `Parser::line`
+			if (node.text.ends_with('\n'))
+				this->line++;
+
 			if (this->peek() == '<' &&
 					this->input[pos + 1] == '/')
 				break;
 
 			if (this->peek() == '<')
 				node.children.emplace_back(this->parseElem());
+
 			else node.text += this->get();
 		}
 
@@ -135,9 +159,53 @@ namespace sols
 		this->parseName();
 		this->expect('>');
 
+		// Get the last line
+		if (node.text.ends_with('\n'))
+			this->line++;
+
+		if (!this->nameExists(node.name))
+		{
+			this->exception(this->line, this->pos, node.text);
+
+			return node;
+		}
+
 		return node;
+	}
+
+	RegisteredName Parser::getNameID(const std::string &id)
+	{
+		for (const auto &x : this->regNames)
+		{ if (x.id == id) return x; }
+
+		return {};
+	}
+
+	bool Parser::nameExists(const std::string &syntax)
+	{
+		for (const auto &x : this->regNames)
+		{
+			if (x.syntax == syntax)
+				return true;
+		}
+
+		return false;
+	}
+
+	bool Parser::registerName(const RegisteredName &name)
+	{
+		if (name.id.empty() ||
+				name.id == this->getNameID(name.id).id) return false;
+
+		this->regNames.emplace_back(name);
+
+		return true;
 	}
 
 	std::string Parser::getID() const
 	{ return this->id; }
+
+	std::vector<RegisteredName> Parser::getNames() const
+	{ return this->regNames; }
 }
+
