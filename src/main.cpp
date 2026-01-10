@@ -15,12 +15,13 @@ int main()
 
 	SOLS_C_FREE(newRgb);
 
-	sols::Parser parser("main-parser", R"(
-<root a"he">
+	std::string file = R"(
+<root a = "he">
 	<child>Heyy world</child>
-	<empty/>
-</root>
-	)");
+	<a>Heyy world</a>
+</root>)";
+
+	sols::Parser parser("main-parser", file);
 
 	sols::Node root = parser.parse();
 
