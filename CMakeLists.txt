@@ -100,7 +100,7 @@ else()
 endif()
 
 # Project Configuration
-set(CPP_STD 17)
+set(CPP_STD 20)
 set(CMAKE_CXX_STANDARD ${CPP_STD})
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
