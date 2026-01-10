@@ -26,7 +26,7 @@ namespace sols
 		Note
 	};
 
-	struct ParseMessage
+	typedef struct ParseMessage
 	{
 		ParserMessageType type;
 
@@ -35,7 +35,7 @@ namespace sols
 		int col;
 
 		std::string message;
-	};
+	} ParseMessage;
 
 	template <typename T>
 	struct ReturnData
