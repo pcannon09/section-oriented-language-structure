@@ -8,6 +8,8 @@ extern "C"
 #	include "../inc/sols/core/wesi/WESI.h"
 }
 
+#include "../testing/modules/commands.hpp"
+
 int main()
 {
 	wesi_init();
@@ -18,10 +20,18 @@ int main()
 	std::string file = R"(
 <root a = "he">
 	<child>Heyy world</child>
-	<a>Heyy world</a>
 </root>)";
 
 	sols::Parser parser("main-parser", file);
+
+	{
+		sols::RegisteredName name;
+		name.id = "root";
+		name.syntax = "root";
+		name.call = sols::commands::solsComment;
+
+		parser.registerName(name);
+	}
 
 	sols::Node root = parser.parse();
 
