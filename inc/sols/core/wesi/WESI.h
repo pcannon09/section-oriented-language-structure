@@ -30,7 +30,7 @@ enum WESI_Type
 int wesi_init(void);
 int wesi_destroy(void);
 
-int wesi_throw(enum WESI_Type type, const char *message, bool show);
+int wesi_throw(enum WESI_Type type, const char *message, const bool show);
 
 char *wesi_resetStyle();
 char *wesi_colorSet(const int color);

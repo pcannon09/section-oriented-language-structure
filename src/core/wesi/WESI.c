@@ -72,7 +72,7 @@ char *wesi_rgbSet(const unsigned int r, const unsigned int g, const unsigned int
 	return dupped;
 }
 
-int wesi_throw(enum WESI_Type type, const char *message, bool show)
+int wesi_throw(enum WESI_Type type, const char *message, const bool show)
 {
 	CSTR totalMsg = cstr_init();
 
@@ -84,9 +84,12 @@ int wesi_throw(enum WESI_Type type, const char *message, bool show)
 		{
 			cstr_add(&totalMsg, "ERROR");
 
-			char *setRGB = wesi_rgbSet(230, 25, 25);
-			printf("%s", setRGB);
-			SOLS_C_FREE(setRGB);
+			if (show)
+			{
+				char *setRGB = wesi_rgbSet(230, 25, 25);
+				printf("%s", setRGB);
+				SOLS_C_FREE(setRGB);
+			}
 
 			break;
 		}
@@ -95,9 +98,12 @@ int wesi_throw(enum WESI_Type type, const char *message, bool show)
 		{
 			cstr_add(&totalMsg, "FATAL");
 
-			char *setRGB = wesi_rgbSet(255, 0, 0);
-			printf("%s", setRGB);
-			SOLS_C_FREE(setRGB);
+			if (show)
+			{
+				char *setRGB = wesi_rgbSet(255, 0, 0);
+				printf("%s", setRGB);
+				SOLS_C_FREE(setRGB);
+			}
 
 			break;
 		}
@@ -106,9 +112,12 @@ int wesi_throw(enum WESI_Type type, const char *message, bool show)
 		{
 			cstr_add(&totalMsg, "WARNING");
 
-			char *setRGB = wesi_rgbSet(212, 212, 0);
-			printf("%s", setRGB);
-			SOLS_C_FREE(setRGB);
+			if (show)
+			{
+				char *setRGB = wesi_rgbSet(212, 212, 0);
+				printf("%s", setRGB);
+				SOLS_C_FREE(setRGB);
+			}
 
 			break;
 		}
@@ -117,9 +126,12 @@ int wesi_throw(enum WESI_Type type, const char *message, bool show)
 		{
 			cstr_add(&totalMsg, "LOG");
 
-			char *setRGB = wesi_rgbSet(245, 245, 245);
-			printf("%s", setRGB);
-			SOLS_C_FREE(setRGB);
+			if (show)
+			{
+				char *setRGB = wesi_rgbSet(245, 245, 245);
+				printf("%s", setRGB);
+				SOLS_C_FREE(setRGB);
+			}
 
 			break;
 		}
