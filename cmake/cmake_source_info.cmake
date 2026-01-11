@@ -1,6 +1,6 @@
 # Directory Setup
 set(SRC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/src")
-set(TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/tests")
+set(TESTS_DIR "${CMAKE_CURRENT_SOURCE_DIR}/testing")
 set(INC_DIR "${CMAKE_CURRENT_SOURCE_DIR}/inc/${projectName}")
 set(VENDOR_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor")
 
@@ -31,5 +31,8 @@ set(SOLS_LIB_SOURCES_LIBS
 
 set(SOLS_SOURCES
 		${SRC_DIR}/main.cpp
+
+		${TESTS_DIR}/modules/commands.cpp
+		${TESTS_DIR}/modules/commands.hpp
 )
 
