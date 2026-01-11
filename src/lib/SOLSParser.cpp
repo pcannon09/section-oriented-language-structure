@@ -8,6 +8,7 @@ extern "C"
 }
 
 #include <algorithm>
+#include <cctype>
 
 namespace sols
 {
@@ -94,15 +95,15 @@ namespace sols
 		std::string sep = std::to_string(line) + "| ";
 
 		exceptMsg += sep + text;
+		exceptMsg += '\n';
 
-		exceptMsg += "\n";
-
-		for (size_t i = 0 ; i < sep.size() ; i++)
+		for (size_t i = 0 ; i < sep.size() + pos ; i++)
 			exceptMsg += "~";
 
 		exceptMsg += "^";
 
 		ciof::print(exceptMsg);
+		wesi_throw(WESIType_Fatal, exceptMsg.c_str(), false);
 	}
 
 	Node Parser::parseElem()
@@ -111,6 +112,25 @@ namespace sols
 
 		Node node;
 		node.name = this->parseName();
+
+		// If name is not registered, make the following action
+		// Throw an exception
+		if (!std::count_if(node.name.begin(), node.name.end(), [](unsigned int c) { return std::isspace(c); } ) &&
+				!this->nameExists(node.name))
+		{
+			const int &posSep = 1 + node.name.size();
+
+			const size_t &lineStart = this->pos - posSep;
+			const size_t &lineEnd = this->input.find('\n', lineStart);
+
+			this->exception(
+					this->line,
+					1,
+					this->input.substr(lineStart, lineEnd - lineStart)
+			);
+
+			return node;
+		}
 
 		this->skipWhitespace();
 
@@ -145,7 +165,7 @@ namespace sols
 				this->line++;
 
 			if (this->peek() == '<' &&
-					this->input[pos + 1] == '/')
+					this->input[pos + 1] == '/') // </
 				break;
 
 			if (this->peek() == '<')
@@ -162,13 +182,6 @@ namespace sols
 		// Get the last line
 		if (node.text.ends_with('\n'))
 			this->line++;
-
-		if (!this->nameExists(node.name))
-		{
-			this->exception(this->line, this->pos, node.text);
-
-			return node;
-		}
 
 		return node;
 	}

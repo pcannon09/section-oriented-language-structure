@@ -35,8 +35,8 @@ namespace sols
 		std::string id;
 		std::string input;
 
-		size_t pos;
-		size_t line;
+		size_t pos = 0;
+		size_t line = 1;
 
 		std::vector<RegisteredName> regNames;
 
