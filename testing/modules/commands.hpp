@@ -8,7 +8,7 @@
 
 namespace sols::commands
 {
-	sols::ParseMessage solsVersion(std::vector<std::string>);
+	sols::ParseMessage solsComment(const std::vector<std::string> &args);
 }
 
 #endif  // INCLUDE_MODULES_COMMANDS_HPP_

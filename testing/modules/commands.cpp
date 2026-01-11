@@ -1,12 +1,14 @@
 #include "commands.hpp"
 
+#include "ciof/ciof.hpp"
+
 namespace sols::commands
 {
-	sols::ParseMessage solsComment(std::vector<std::string>)
+	sols::ParseMessage solsComment(const std::vector<std::string> &args)
 	{
 		sols::ParseMessage pmsg;
 
-
+		ciof::print("commenttt");
 
 		return pmsg;
 	}
