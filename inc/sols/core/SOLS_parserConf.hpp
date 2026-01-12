@@ -27,6 +27,13 @@ namespace sols
 		Note
 	};
 
+	enum class SOLS_Bool
+	{
+		False,
+		True,
+		None
+	};
+
 	typedef struct ParseMessage
 	{
 		ParserMessageType type;
