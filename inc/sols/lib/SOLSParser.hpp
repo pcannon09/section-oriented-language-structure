@@ -8,9 +8,10 @@
 
 #include "../core/SOLS_parserConf.hpp"
 
-#define SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR 		-1
-#define SOLS_EXECCOMMAND_RETACTION_SUCCESS 			0
-#define SOLS_EXECCOMMAND_RETACTION_REMOVELINES 		1
+#define SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR 			-1
+#define SOLS_EXECCOMMAND_RETACTION_SUCCESS 				0
+#define SOLS_EXECCOMMAND_RETACTION_REPLACELINES 		1
+#define SOLS_EXECCOMMAND_RETACTION_NOCALL 				2
 
 namespace sols
 {
@@ -27,6 +28,8 @@ namespace sols
 	{
 		int posStart;
 
+		SOLS_Bool isOpened = SOLS_Bool::None;
+
 		std::string file;
 		std::string commandName;
 	} RegisterCommand;
@@ -36,7 +39,7 @@ namespace sols
 		std::string id;
 		std::string syntax;
 
-		std::function<ParseMessage(RegisterCommand, std::vector<std::string>)> call;
+		std::function<ParseMessage(const RegisterCommand &command, const std::vector<std::string>&)> call;
 	} RegisteredName;
 
 	typedef std::pair<bool, std::string> InitInfoError;
@@ -59,8 +62,6 @@ namespace sols
 		virtual InitInfoError __init();
 		virtual InitInfoError __end();
 
-
-
 	public:
 		explicit Parser(const std::string &id, const std::string &input);
 		~Parser();
@@ -69,7 +70,7 @@ namespace sols
 
 		Node parse();
 		void skipWhitespace();
-		void expect(char c);
+		bool expect(char c);
 
 		char peek() const;
 		char get();
@@ -82,7 +83,7 @@ namespace sols
 		bool nameExists(const std::string &syntax);
 		bool registerName(const RegisteredName &name);
 
-		void exception(const unsigned int line, const unsigned int &pos, const std::string &text);
+		void exception(const unsigned int line, const unsigned int &pos, const std::string &text, const std::string &message);
 
 		std::string parseName();
 		std::string parseStr();

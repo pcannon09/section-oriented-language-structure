@@ -46,14 +46,18 @@ namespace sols
 			? input[pos++] : '\0';
 	}
 
-	void Parser::expect(char c)
+	bool Parser::expect(char c)
 	{
 		if (this->get() != c)
 		{
 			std::string chstr(1, c);
 
 			wesi_throw(WESIType_Error, ciof::format("Expected token `%1`", chstr).c_str(), true);
+
+			return false;
 		}
+
+		return true;
 	}
 
 	void Parser::skipWhitespace()
@@ -89,12 +93,12 @@ namespace sols
 		return str;
 	}
 
-	void Parser::exception(const unsigned int line, const unsigned int &pos, const std::string &text)
+	void Parser::exception(const unsigned int line, const unsigned int &pos, const std::string &text, const std::string &message)
 	{
 		std::string exceptMsg;
 		std::string sep = std::to_string(line) + "| ";
 
-		exceptMsg += sep + text;
+		exceptMsg += message + "\n" + sep + text;
 		exceptMsg += '\n';
 
 		for (size_t i = 0 ; i < sep.size() + pos ; i++)
@@ -108,16 +112,25 @@ namespace sols
 
 	void Parser::execCommand(ParseMessage commandRet)
 	{
+		// Make errors first
+		if (commandRet.code == SOLS_EXECCOMMAND_RETACTION_NOCALL)
+			return;
+
+		// If no errors, do the following:
 		if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_SUCCESS)
-			return; // Don't do anything if success;
+			return; // Don't do anything if no error encountered;
 					// Action is already executed
 
-		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_REMOVELINES)
+		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_REPLACELINES)
 		{
-			// TODO:
-			// Remove lines from A to B
-			// const size_t &startLine = commandRet.file.find('\n');
-		}
+			this->input.erase(
+        		commandRet.lineRange.first,
+        		commandRet.lineRange.second - commandRet.lineRange.first
+    		);
+
+    		// Continue parsing after the removed block
+    		this->pos = commandRet.lineRange.first;
+    	}
 
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR)
 		{
@@ -138,39 +151,44 @@ namespace sols
 
 	Node Parser::parseElem()
 	{
-		this->expect('<');
+		RegisterCommand commandSend;
+
+		if (this->expect('<'))
+			commandSend.isOpened = SOLS_Bool::True;
 
 		Node node;
 		node.name = this->parseName();
+		commandSend.commandName = node.name;
+
+		const int &posSep = 1 + node.name.size();
+
+		const size_t &lineStart = this->pos - posSep;
+		const size_t &lineEnd = this->input.find('\n', lineStart);
 
 		// If name is not registered, make the following action
 		// Throw an exception
 		if (!std::count_if(node.name.begin(), node.name.end(), [](unsigned int c) { return std::isspace(c); } ) &&
 				!this->nameExists(node.name))
 		{
-			const int &posSep = 1 + node.name.size();
-
-			const size_t &lineStart = this->pos - posSep;
-			const size_t &lineEnd = this->input.find('\n', lineStart);
-
 			this->exception(
 					this->line,
 					1,
-					this->input.substr(lineStart, lineEnd - lineStart)
+					this->input.substr(lineStart, lineEnd - lineStart),
+					ciof::format("Command name `%1` is not registered", node.name)
 			);
 
 			return node;
 		}
 
-		RegisterCommand commandSend;
 		commandSend.file = this->input;
 		commandSend.posStart = this->pos;
 
-		const ParseMessage &commandRet = this->getNameBySyntax(node.text).call(commandSend, {""});
+		const RegisteredName &regName = this->getNameBySyntax(node.name);
+		ParseMessage commandCall = regName.call(commandSend, {""});
 
-		if (commandRet.code == -1)
+		if (commandCall.code == -1)
 			return node;
-		else this->execCommand(commandRet);
+		else this->execCommand(commandCall);
 
 		this->skipWhitespace();
 
@@ -215,9 +233,20 @@ namespace sols
 		}
 
 		// Closing tag
+		// </{name}>
 		this->expect('<'); this->expect('/');
 		this->parseName();
-		this->expect('>');
+		if (this->expect('>'))
+			commandSend.isOpened = SOLS_Bool::False;
+
+		// Run again if the command call needs to be executed again;
+		// 	* Developer can disable it when developing the software with SOLS
+		commandCall = regName.call(commandSend, {""});
+
+		if (commandCall.code == -1)
+			return node;
+
+		else this->execCommand(commandCall);
 
 		// Get the last line
 		if (node.text.ends_with('\n'))
@@ -237,7 +266,10 @@ namespace sols
 	RegisteredName Parser::getNameBySyntax(const std::string &syntax)
 	{
 		for (const auto &x : this->regNames)
-		{ if (x.syntax == syntax) return x; }
+		{
+			if (x.syntax == syntax)
+				return x;
+		}
 
 		return {};
 	}
