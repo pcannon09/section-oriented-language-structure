@@ -11,20 +11,18 @@
 # 	define __WESI_EXTERNC_CLOSE
 #endif
 
-__WESI_EXTERNC_OPEN
 extern bool wesi_hasInit;
 extern CVEC wesi_warnings;
 extern CVEC wesi_errors;
 extern CVEC wesi_logs;
 extern CVEC wesi_total;
-__WESI_EXTERNC_CLOSE;
 
 enum WESI_Type
 {
 	WESIType_Error,
-	WESIType_Fatal,
 	WESIType_Warning,
-	WESIType_Log
+	WESIType_Log,
+	WESIType_Fatal,
 };
 
 int wesi_init(void);
