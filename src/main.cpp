@@ -18,17 +18,21 @@ int main()
 	SOLS_C_FREE(newRgb);
 
 	std::string file = R"(
-<root a = "he">
-	<child>Heyy world</child>
-</root>)";
+<comment>
+	<co>Heyy world</co>
+</comment>
+)";
 
 	sols::Parser parser("main-parser", file);
 
 	{
 		sols::RegisteredName name;
-		name.id = "root";
-		name.syntax = "root";
-		name.call = sols::commands::solsComment;
+
+		name.id = "comment";
+		name.syntax = "comment";
+		name.call = [](const sols::RegisterCommand& cmd,
+               		const std::vector<std::string>& args) -> sols::ParseMessage
+		{ return sols::commands::solsComment(cmd, args); };
 
 		parser.registerName(name);
 	}
