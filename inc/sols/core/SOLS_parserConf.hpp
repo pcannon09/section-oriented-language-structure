@@ -22,6 +22,7 @@ namespace sols
 	enum class ParserMessageType
 	{
 		Error,
+		Warning,
 		Message,
 		Note
 	};
@@ -30,11 +31,15 @@ namespace sols
 	{
 		ParserMessageType type;
 
+		std::pair<unsigned int, unsigned int> lineRange;
+
 		int code;
 		int line;
 		int col;
+		int command;
 
 		std::string message;
+		std::string file;
 	} ParseMessage;
 
 	template <typename T>
