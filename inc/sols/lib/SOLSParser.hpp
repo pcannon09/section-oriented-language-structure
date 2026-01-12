@@ -8,6 +8,10 @@
 
 #include "../core/SOLS_parserConf.hpp"
 
+#define SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR 		-1
+#define SOLS_EXECCOMMAND_RETACTION_SUCCESS 			0
+#define SOLS_EXECCOMMAND_RETACTION_REMOVELINES 		1
+
 namespace sols
 {
 	typedef struct Node 
@@ -19,12 +23,20 @@ namespace sols
 		std::vector<Node> children;
 	} Node;
 
+	typedef struct RegisterCommand
+	{
+		int posStart;
+
+		std::string file;
+		std::string commandName;
+	} RegisterCommand;
+
 	typedef struct RegisteredName
 	{
 		std::string id;
 		std::string syntax;
 
-		std::function<ParseMessage(std::vector<std::string>)> call;
+		std::function<ParseMessage(RegisterCommand, std::vector<std::string>)> call;
 	} RegisteredName;
 
 	typedef std::pair<bool, std::string> InitInfoError;
@@ -47,9 +59,13 @@ namespace sols
 		virtual InitInfoError __init();
 		virtual InitInfoError __end();
 
+
+
 	public:
 		explicit Parser(const std::string &id, const std::string &input);
 		~Parser();
+
+		virtual void execCommand(ParseMessage commandRet);
 
 		Node parse();
 		void skipWhitespace();
@@ -61,6 +77,7 @@ namespace sols
 		Node parseElem();
 
 		RegisteredName getNameID(const std::string &id);
+		RegisteredName getNameBySyntax(const std::string &syntax);
 
 		bool nameExists(const std::string &syntax);
 		bool registerName(const RegisteredName &name);

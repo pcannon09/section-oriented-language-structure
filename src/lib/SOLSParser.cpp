@@ -106,6 +106,36 @@ namespace sols
 		wesi_throw(WESIType_Fatal, exceptMsg.c_str(), false);
 	}
 
+	void Parser::execCommand(ParseMessage commandRet)
+	{
+		if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_SUCCESS)
+			return; // Don't do anything if success;
+					// Action is already executed
+
+		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_REMOVELINES)
+		{
+			// TODO:
+			// Remove lines from A to B
+			// const size_t &startLine = commandRet.file.find('\n');
+		}
+
+		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR)
+		{
+ 			WESI_Type setType = WESIType_Fatal;
+
+			if (commandRet.type == ParserMessageType::Error)
+				setType = WESIType_Error;
+
+			else if (commandRet.type == ParserMessageType::Warning)
+				setType = WESIType_Warning;
+
+			else if (commandRet.type == ParserMessageType::Message)
+				setType = WESIType_Log;
+
+			wesi_throw(setType, commandRet.message.c_str(), true);
+		}
+	}
+
 	Node Parser::parseElem()
 	{
 		this->expect('<');
@@ -132,12 +162,22 @@ namespace sols
 			return node;
 		}
 
+		RegisterCommand commandSend;
+		commandSend.file = this->input;
+		commandSend.posStart = this->pos;
+
+		const ParseMessage &commandRet = this->getNameBySyntax(node.text).call(commandSend, {""});
+
+		if (commandRet.code == -1)
+			return node;
+		else this->execCommand(commandRet);
+
 		this->skipWhitespace();
 
 		// Get attributes
 		while (std::isalnum(this->peek()))
 		{
-			const std::string &key = parseName();
+			const std::string &key = this->parseName();
 
 			this->skipWhitespace();
 			this->expect('=');
@@ -190,6 +230,14 @@ namespace sols
 	{
 		for (const auto &x : this->regNames)
 		{ if (x.id == id) return x; }
+
+		return {};
+	}
+
+	RegisteredName Parser::getNameBySyntax(const std::string &syntax)
+	{
+		for (const auto &x : this->regNames)
+		{ if (x.syntax == syntax) return x; }
 
 		return {};
 	}
