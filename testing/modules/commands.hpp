@@ -10,6 +10,7 @@
 
 namespace sols::commands
 {
+	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args);
 	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args);
 }
 

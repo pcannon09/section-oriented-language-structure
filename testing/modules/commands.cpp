@@ -1,13 +1,59 @@
+#include <algorithm>
+
 #include "commands.hpp"
 
 #include "ciof/ciof.hpp"
+
+extern "C"
+{
+# 	include "cstr/cstr.h"
+}
 
 #define SOLS_COMMAND_ERRORCODE_INFOFAIL 	-2
 
 namespace sols::commands
 {
-	sols::ParseMessage solsComment(const RegisterCommand &command,
-            const std::vector<std::string> &args)
+	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+    	sols::ParseMessage pmsg{};
+    	pmsg.code = 0;
+
+		if (command.isOpened == SOLS_Bool::None) // Closed
+			return pmsg;
+
+		std::string totalPrint;
+
+		for (const auto &a : args)
+		{ totalPrint += a; }
+
+		// Replace everything from the string such as:
+		// \n
+		// \t
+		// \r
+		// etc
+		const std::map<std::string, std::string> replaceChs = {
+			{ "\\n", "\n" },
+			{ "\\t", "\t" },
+			{ "\\r", "\r" }
+		};
+
+		CSTR replacement = cstr_init();
+
+		cstr_set(&replacement, totalPrint.c_str());
+
+		for (const auto &replace : replaceChs)
+			cstr_replaceAll(&replacement, replace.first.c_str(), replace.second.c_str());
+
+		totalPrint = replacement.data;
+
+		cstr_destroy(&replacement);
+
+		ciof::echo(totalPrint);
+
+    	return pmsg;
+	}
+
+	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
     	sols::ParseMessage pmsg{};
     	pmsg.code = 0;
@@ -35,6 +81,5 @@ namespace sols::commands
 
     	return pmsg;
 	}
-
 }
 
