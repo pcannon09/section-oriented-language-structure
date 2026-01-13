@@ -13,15 +13,23 @@
 #define SOLS_EXECCOMMAND_RETACTION_REPLACELINES 		1
 #define SOLS_EXECCOMMAND_RETACTION_NOCALL 				2
 
+#define SOLS_ADD_COMMAND(func) \
+	[](const sols::RegisterCommand &cmd, \
+		const std::vector<std::string> &args) -> sols::ParseMessage \
+	{ return func(cmd, args); }; \
+
 namespace sols
 {
 	typedef struct Node 
 	{
-		std::string name;
+		std::string name; // Command name <{command}>
 		std::string text;
+		std::string content; // Content inside;
+							 // <command>{CONTENT_HERE}</command>
 
-		std::map<std::string, std::string> attrs;
-		std::vector<Node> children;
+		std::map<std::string, std::string> attrs; // Variable set;
+												  // var = "something"
+		std::vector<Node> children; // Sub-nodes
 	} Node;
 
 	typedef struct RegisterCommand

@@ -2,13 +2,12 @@
 
 #include "../../inc/sols/lib/SOLSParser.hpp"
 
-extern "C"
-{
-#	include "../../inc/sols/core/wesi/WESI.h"
-}
+#include "../../inc/sols/core/wesi/WESI.h"
 
 #include <algorithm>
 #include <cctype>
+
+#define __SOLS_PARSER_COMMAND_CALL(name) name.call(commandSend, {node.content})
 
 namespace sols
 {
@@ -186,7 +185,7 @@ namespace sols
 		commandSend.posStart = sectionStart;
 
 		const RegisteredName &regName = this->getNameBySyntax(node.name);
-		ParseMessage commandCall = regName.call(commandSend, {""});
+		ParseMessage commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
 
 		if (commandCall.code == -1)
 			return node;
@@ -235,8 +234,15 @@ namespace sols
 			if (this->peek() == '<')
 				node.children.emplace_back(this->parseElem());
 
-			else node.text += this->get();
+			else
+			{
+				node.text += this->get();
+				node.content += this->peek();
+			}
 		}
+
+		// Remove the last remained char that shouldn't be there for the closing
+		if (!node.content.empty()) node.content.pop_back();
 
 		// Closing tag
 		// </{name}>
@@ -247,7 +253,7 @@ namespace sols
 
 		// Run again if the command call needs to be executed again;
 		// 	* Developer can disable it when developing the software with SOLS
-		commandCall = regName.call(commandSend, {""});
+		commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
 
 		if (commandCall.code == -1)
 			return node;
@@ -307,4 +313,6 @@ namespace sols
 	std::vector<RegisteredName> Parser::getNames() const
 	{ return this->regNames; }
 }
+
+#undef __SOLS_PARSER_COMMAND_CALL
 
