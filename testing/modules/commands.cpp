@@ -6,29 +6,35 @@
 
 namespace sols::commands
 {
-	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args)
+	sols::ParseMessage solsComment(const RegisterCommand &command,
+            const std::vector<std::string> &args)
 	{
     	sols::ParseMessage pmsg{};
     	pmsg.code = 0;
 
-    	// Only act on open section
     	if (command.isOpened != SOLS_Bool::True)
         	return pmsg;
 
-    	size_t start = command.posStart;
+    	const std::string openTag  = ciof::format("<%1", command.commandName);
+    	const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
 
-    	// Find closing section
-    	const std::string &toFind = ciof::format("</%1>", command.commandName);
-    	size_t end = command.file.find(toFind, start);
+    	// Find opening tag
+    	const size_t &start = command.file.find(openTag);
 
-    	if (end == std::string::npos) return pmsg;
+    	if (start == std::string::npos)
+        	return pmsg;
 
-    	end += std::string(toFind).size();
+    	// Find closing tag after opening
+    	size_t end = command.file.find(closeTag, start);
+
+    	if (end != std::string::npos) end += closeTag.size(); // include: </comment>
+    	else end = command.file.size(); // Remove until EOF
 
     	pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
     	pmsg.lineRange = { start, end };
 
     	return pmsg;
 	}
+
 }
 
