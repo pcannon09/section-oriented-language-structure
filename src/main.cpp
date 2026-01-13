@@ -3,10 +3,7 @@
 
 #include "ciof/ciof.hpp"
 
-extern "C"
-{
-#	include "../inc/sols/core/wesi/WESI.h"
-}
+#include "../inc/sols/core/wesi/WESI.h"
 
 #include "../testing/modules/commands.hpp"
 
@@ -18,10 +15,11 @@ int main()
 	SOLS_C_FREE(newRgb);
 
 	std::string file = R"(
-<comment>
-	<co>Heyy world</co>
-</comment>
+<print>Heyy world
+how
+are you?</print>
 )";
+// <comment> Print something </comment>
 
 	const sols::ParserConfig &parserConfig = {
 		.automaticLines = true
@@ -34,9 +32,17 @@ int main()
 
 		name.id = "comment";
 		name.syntax = "comment";
-		name.call = [](const sols::RegisterCommand &cmd,
-               		const std::vector<std::string> &args) -> sols::ParseMessage
-		{ return sols::commands::solsComment(cmd, args); };
+		name.call = SOLS_ADD_COMMAND(sols::commands::solsComment)
+
+		parser.registerName(name);
+	}
+
+	{
+		sols::RegisteredName name;
+
+		name.id = "print";
+		name.syntax = "print";
+		name.call = SOLS_ADD_COMMAND(sols::commands::solsPrint)
 
 		parser.registerName(name);
 	}
