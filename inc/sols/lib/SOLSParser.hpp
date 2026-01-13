@@ -42,6 +42,12 @@ namespace sols
 		std::function<ParseMessage(const RegisterCommand &command, const std::vector<std::string>&)> call;
 	} RegisteredName;
 
+	typedef struct ParserConfig
+	{
+		bool automaticLines = true; // ie:
+									// Adds EOF at the end of the file and stops parsing from there
+	} ParserConfig;
+
 	typedef std::pair<bool, std::string> InitInfoError;
 
 	class Parser 
@@ -55,6 +61,8 @@ namespace sols
 
 		std::vector<RegisteredName> regNames;
 
+		ParserConfig config;
+
 	protected:
 		InitInfoError initErrorMsg;
 		InitInfoError endErrorMsg;
@@ -63,7 +71,7 @@ namespace sols
 		virtual InitInfoError __end();
 
 	public:
-		explicit Parser(const std::string &id, const std::string &input);
+		explicit Parser(const std::string &id, const std::string &input, const ParserConfig &conf);
 		~Parser();
 
 		virtual void execCommand(ParseMessage commandRet);

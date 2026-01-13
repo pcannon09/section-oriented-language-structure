@@ -20,8 +20,8 @@ namespace sols
 	{ return { true, "" }; }
 
 	// PUBLIC //
-	Parser::Parser(const std::string &id, const std::string &input)
-		: id(id), input(input)
+	Parser::Parser(const std::string &id, const std::string &input, const ParserConfig &conf)
+		: id(id), input(input), config(conf)
 	{ this->initErrorMsg = this->__init(); }
 
 	Parser::~Parser()
@@ -153,6 +153,8 @@ namespace sols
 	{
 		RegisterCommand commandSend;
 
+		const size_t &sectionStart = this->pos;
+
 		if (this->expect('<'))
 			commandSend.isOpened = SOLS_Bool::True;
 
@@ -181,7 +183,7 @@ namespace sols
 		}
 
 		commandSend.file = this->input;
-		commandSend.posStart = this->pos;
+		commandSend.posStart = sectionStart;
 
 		const RegisteredName &regName = this->getNameBySyntax(node.name);
 		ParseMessage commandCall = regName.call(commandSend, {""});
@@ -192,7 +194,8 @@ namespace sols
 
 		this->skipWhitespace();
 
-		// Get attributes
+		// Get attributes;
+		// var = "something"
 		while (std::isalnum(this->peek()))
 		{
 			const std::string &key = this->parseName();
@@ -218,6 +221,9 @@ namespace sols
 		// Content inside the node
 		while (1)
 		{
+			if (this->pos >= this->input.size())
+        		return node;
+
 			// Get new line char to add a new line to `Parser::line`
 			if (node.text.ends_with('\n'))
 				this->line++;
