@@ -8,7 +8,7 @@
 # 	undef __CSTR_OK
 #endif // defined(__CSTR_OK)
 
-#if __STDC_VERSION__ >= CSTR_DEFAULT_C_STD
+#if __STDC_VERSION__ >= CSTR_DEFAULT_C_STD || defined(__cplusplus)
 
 #ifdef CSTR_sys_strdup
 # 	undef CSTR_sys_strdup

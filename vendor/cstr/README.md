@@ -1,5 +1,5 @@
 # CSTR
-## 1.1.0
+## 1.1.0-sols-edition
 
 `CSTR` is a lightweight C string utility library that provides a safer and more flexible alternative to raw C-style strings. It wraps dynamic allocation, formatting, substring manipulation, and replacement in a consistent API without pulling in heavy dependencies.
 

@@ -6,7 +6,7 @@
 
 DOXYFILE_ENCODING      = UTF-8
 PROJECT_NAME           = "CSTR"
-PROJECT_NUMBER         = v1.1.0-build
+PROJECT_NUMBER         = 1.1.0-sols-edition-build
 PROJECT_BRIEF          = "Simple yet powerful string manipulation in C"
 OUTPUT_DIRECTORY       = docs/
 CREATE_SUBDIRS         = YES
