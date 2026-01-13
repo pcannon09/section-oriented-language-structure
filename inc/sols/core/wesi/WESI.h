@@ -1,8 +1,6 @@
 #ifndef INCLUDE_WESI_WESI_H_
 #define INCLUDE_WESI_WESI_H_
 
-#include "cvec/cvec.h"
-
 #ifdef __cplusplus
 # 	define __WESI_EXTERNC_OPEN 		extern "C" {
 # 	define __WESI_EXTERNC_CLOSE 	}
@@ -10,6 +8,10 @@
 # 	define __WESI_EXTERNC_OPEN
 # 	define __WESI_EXTERNC_CLOSE
 #endif
+
+__WESI_EXTERNC_OPEN
+
+#include "cvec/cvec.h"
 
 extern bool wesi_hasInit;
 extern CVEC wesi_warnings;
@@ -33,5 +35,7 @@ int wesi_throw(enum WESI_Type type, const char *message, const bool show);
 char *wesi_resetStyle();
 char *wesi_colorSet(const int color);
 char *wesi_rgbSet(const unsigned int r, const unsigned int g, const unsigned int b);
+
+__WESI_EXTERNC_CLOSE
 
 #endif  // INCLUDE_WESI_WESI_H_
