@@ -23,15 +23,19 @@ int main()
 </comment>
 )";
 
-	sols::Parser parser("main-parser", file);
+	const sols::ParserConfig &parserConfig = {
+		.automaticLines = true
+	};
+
+	sols::Parser parser("main-parser", file, parserConfig);
 
 	{
 		sols::RegisteredName name;
 
 		name.id = "comment";
 		name.syntax = "comment";
-		name.call = [](const sols::RegisterCommand& cmd,
-               		const std::vector<std::string>& args) -> sols::ParseMessage
+		name.call = [](const sols::RegisterCommand &cmd,
+               		const std::vector<std::string> &args) -> sols::ParseMessage
 		{ return sols::commands::solsComment(cmd, args); };
 
 		parser.registerName(name);
