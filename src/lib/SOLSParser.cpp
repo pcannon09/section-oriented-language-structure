@@ -8,6 +8,9 @@
 #include <cctype>
 
 #define __SOLS_PARSER_COMMAND_CALL(name) name.call(commandSend, {node.content})
+#define __SOLS_RETURN_DEBUG(statement, ret) \
+	statement \
+	return ret
 
 namespace sols
 {
@@ -30,7 +33,8 @@ namespace sols
 	{
 		this->skipWhitespace();
 
-		return this->parseElem();
+		const auto elemParsed = this->parseElem();
+		return elemParsed;
 	}
 
 	char Parser::peek() const
@@ -122,13 +126,17 @@ namespace sols
 
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_REPLACELINES)
 		{
-			this->input.erase(
+			this->input.replace(
         		commandRet.lineRange.first,
-        		commandRet.lineRange.second - commandRet.lineRange.first
+        		commandRet.lineRange.second - commandRet.lineRange.first,
+        		commandRet.message
     		);
 
     		// Continue parsing after the removed block
     		this->pos = commandRet.lineRange.first;
+    		
+    		if (!commandRet.message.empty())
+    			this->parseElem();
     	}
 
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR)
@@ -178,7 +186,7 @@ namespace sols
 					ciof::format("Command name `%1` is not registered", node.name)
 			);
 
-			return node;
+			__SOLS_RETURN_DEBUG(, node);
 		}
 
 		commandSend.file = this->input;
@@ -188,7 +196,7 @@ namespace sols
 		ParseMessage commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
 
 		if (commandCall.code == -1)
-			return node;
+		{ __SOLS_RETURN_DEBUG(, node); }
 		else this->execCommand(commandCall);
 
 		this->skipWhitespace();
@@ -214,14 +222,14 @@ namespace sols
 			this->get();
 			this->expect('>');
 
-			return node;
+			__SOLS_RETURN_DEBUG(, node);
 		}
 
 		// Content inside the node
 		while (1)
 		{
 			if (this->pos >= this->input.size())
-        		return node;
+ 				__SOLS_RETURN_DEBUG(, node);
 
 			// Get new line char to add a new line to `Parser::line`
 			if (node.text.ends_with('\n'))
@@ -256,15 +264,14 @@ namespace sols
 		commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
 
 		if (commandCall.code == -1)
-			return node;
-
+		{ __SOLS_RETURN_DEBUG(, node); }
 		else this->execCommand(commandCall);
 
 		// Get the last line
 		if (node.text.ends_with('\n'))
 			this->line++;
 
-		return node;
+		__SOLS_RETURN_DEBUG(, node);
 	}
 
 	RegisteredName Parser::getNameID(const std::string &id)
@@ -309,6 +316,9 @@ namespace sols
 
 	std::string Parser::getID() const
 	{ return this->id; }
+
+	std::string Parser::getInput() const
+	{ return this->input; }
 
 	std::vector<RegisteredName> Parser::getNames() const
 	{ return this->regNames; }

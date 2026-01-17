@@ -63,6 +63,7 @@ namespace sols
 	private:
 		std::string id;
 		std::string input;
+		std::string parsedStr;
 
 		size_t pos = 0;
 		size_t line = 1;
@@ -85,6 +86,7 @@ namespace sols
 		virtual void execCommand(ParseMessage commandRet);
 
 		Node parse();
+
 		void skipWhitespace();
 		bool expect(char c);
 
@@ -105,6 +107,7 @@ namespace sols
 		std::string parseStr();
 
 		std::string getID() const;
+		std::string getInput() const;
 		std::vector<RegisteredName> getNames() const;
 	};
 }
