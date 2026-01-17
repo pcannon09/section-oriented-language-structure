@@ -15,9 +15,7 @@ int main()
 	SOLS_C_FREE(newRgb);
 
 	std::string file = R"(
-<print>Heyy world
-how
-are you?</print>
+<print> Hello World! </print>
 )";
 // <comment> Print something </comment>
 
