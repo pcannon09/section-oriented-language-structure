@@ -15,9 +15,10 @@ int main()
 	SOLS_C_FREE(newRgb);
 
 	std::string file = R"(
-<print> Hello World! </print>
+<include>./testing/files/testing.sols</include>
+<print>Hello world\n</print>
+<print>Hello world22\n</print>
 )";
-// <comment> Print something </comment>
 
 	const sols::ParserConfig &parserConfig = {
 		.automaticLines = true
@@ -45,7 +46,17 @@ int main()
 		parser.registerName(name);
 	}
 
-	sols::Node root = parser.parse();
+	{
+		sols::RegisteredName name;
+
+		name.id = "include";
+		name.syntax = "include";
+		name.call = SOLS_ADD_COMMAND(sols::commands::solsInclude)
+
+		parser.registerName(name);
+	}
+
+	auto root = parser.parse();
 
 	wesi_destroy();
 
