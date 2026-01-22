@@ -16,8 +16,8 @@ int main()
 
 	std::string file = R"(
 <include>./testing/files/testing.sols</include>
-<print>Hello world\n</print>
-<print>Hello world22\n</print>
+<comment> <print>Hello world\n</print> </comment>
+<print>Goodbye world\n</print>
 )";
 
 	const sols::ParserConfig &parserConfig = {
