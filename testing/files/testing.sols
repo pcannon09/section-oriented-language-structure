@@ -3,3 +3,4 @@
 echo "Hello world, it's me, your default shell"
 </command>
 
+<python>./testing/files/test1.py</python>
