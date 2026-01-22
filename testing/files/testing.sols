@@ -1,6 +1,4 @@
-<print>Hello, how's your day?\n</print>
-<command>
-echo "Hello world, it's me, your default shell"
-</command>
-
-<python>./testing/files/test1.py</python>
+<print a = "USER: Good, what about you?">
+Hello, how's your day?\n
+$a
+</print>
