@@ -5,10 +5,12 @@
 
 #include "../inc/sols/core/wesi/WESI.h"
 
-#include "../testing/modules/commands.hpp"
+#include "../inc/sols/lib/SOLSDefaultCommands.hpp"
 
 int main()
 {
+	sols::defcommands::_utils::parseNonRawString("Hello world%welcome", "welcome", ", Paul");
+
 	wesi_init();
 	char *newRgb = wesi_rgbSet(255, 255, 20);
 
@@ -31,7 +33,7 @@ int main()
 
 		name.id = "comment";
 		name.syntax = "comment";
-		name.call = SOLS_ADD_COMMAND(sols::commands::solsComment)
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsComment)
 
 		parser.registerName(name);
 	}
@@ -41,7 +43,7 @@ int main()
 
 		name.id = "print";
 		name.syntax = "print";
-		name.call = SOLS_ADD_COMMAND(sols::commands::solsPrint)
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsPrint)
 
 		parser.registerName(name);
 	}
@@ -51,7 +53,7 @@ int main()
 
 		name.id = "include";
 		name.syntax = "include";
-		name.call = SOLS_ADD_COMMAND(sols::commands::solsInclude)
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsInclude)
 
 		parser.registerName(name);
 	}
@@ -61,7 +63,7 @@ int main()
 
 		name.id = "command-call";
 		name.syntax = "command";
-		name.call = SOLS_ADD_COMMAND(sols::commands::solsCmd)
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsCmd)
 
 		parser.registerName(name);
 	}
@@ -71,7 +73,7 @@ int main()
 
 		name.id = "python-call";
 		name.syntax = "python";
-		name.call = SOLS_ADD_COMMAND(sols::commands::solsPython)
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsPython)
 
 		parser.registerName(name);
 	}
