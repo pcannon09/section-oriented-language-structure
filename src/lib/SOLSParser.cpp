@@ -29,12 +29,21 @@ namespace sols
 	Parser::~Parser()
 	{ this->endErrorMsg = this->__end(); }
 
-	Node Parser::parse()
+	std::vector<Node> Parser::parse()
 	{
+		std::vector<Node> nodes;
+
 		this->skipWhitespace();
 
-		const auto elemParsed = this->parseElem();
-		return elemParsed;
+		while (this->pos < this->input.size())
+		{
+			if (this->peek() == '<')
+				nodes.emplace_back(this->parseElem());
+
+			this->skipWhitespace();
+		}
+
+		return nodes;
 	}
 
 	char Parser::peek() const

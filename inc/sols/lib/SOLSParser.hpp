@@ -85,7 +85,7 @@ namespace sols
 
 		virtual void execCommand(ParseMessage commandRet);
 
-		Node parse();
+		std::vector<Node> parse();
 
 		void skipWhitespace();
 		bool expect(char c);
