@@ -1,22 +1,6 @@
 #ifndef INCLUDE_MODULES_COMMANDS_HPP_
 #define INCLUDE_MODULES_COMMANDS_HPP_
 
-#include "../../inc/sols/core/SOLS_parserConf.hpp"
-
-#include "../../inc/sols/lib/SOLSParser.hpp"
-
-#include <string>
-#include <vector>
-
-namespace sols::commands
-{
-	sols::ParseMessage solsPython(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsCmd(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsCall(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsInclude(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args);
-	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args);
-}
+// Empty; To be used later for testing
 
 #endif  // INCLUDE_MODULES_COMMANDS_HPP_
