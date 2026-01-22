@@ -10,6 +10,10 @@
 
 namespace sols::commands
 {
+	sols::ParseMessage solsPython(const RegisterCommand &command, const std::vector<std::string> &args);
+	sols::ParseMessage solsCmd(const RegisterCommand &command, const std::vector<std::string> &args);
+	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args);
+	sols::ParseMessage solsCall(const RegisterCommand &command, const std::vector<std::string> &args);
 	sols::ParseMessage solsInclude(const RegisterCommand &command, const std::vector<std::string> &args);
 	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args);
 	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args);

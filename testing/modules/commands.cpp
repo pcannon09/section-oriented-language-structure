@@ -2,6 +2,10 @@
 #include <fstream>
 #include <sstream>
 
+#include "../../inc/sols/SOLSpredefines.h"
+
+#include "../../inc/sols/core/SOLS_callSystemCmd.h"
+
 #include "commands.hpp"
 
 #include "ciof/ciof.hpp"
@@ -19,6 +23,82 @@ namespace fs = std::filesystem;
 
 namespace sols::commands
 {
+	sols::ParseMessage solsCmd(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
+
+		if (command.isOpened != SOLS_Bool::False)
+			return pmsg;
+
+		std::string cmdArgs;
+
+		for (const auto &a : args)
+		{ cmdArgs += a + " "; }
+
+		SOLS_PairExecCommand result = sols_core_execCommand(cmdArgs.c_str(), true);
+
+		std::string stdresult = result.second; // stdout, stderr
+
+		SOLS_C_FREE(result.second);
+
+		pmsg.code = result.first;
+		pmsg.message = stdresult;
+
+		return pmsg;
+	}
+
+	sols::ParseMessage solsPython(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
+
+		if (command.isOpened != SOLS_Bool::False)
+			return pmsg;
+
+		sols::ParseMessage incData = solsInclude(command, args);
+
+		std::vector<std::string> totalArgs;
+
+		totalArgs.emplace_back(DEFAULT_PYTHON_PATH);
+
+		for (const auto &arg : args)
+		{ totalArgs.emplace_back(arg); }
+
+		// Execute python
+		// For example, with this style:
+		// python /path/to/file.py
+		pmsg = solsCmd(command, totalArgs);
+
+		return pmsg;
+	}
+
+	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+    	sols::ParseMessage pmsg{};
+    	pmsg.code = 0;
+
+		if (command.isOpened == SOLS_Bool::None) // Closed
+			return pmsg;
+
+
+
+    	return pmsg;
+	}
+
+	sols::ParseMessage solsCall(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+    	sols::ParseMessage pmsg{};
+    	pmsg.code = 0;
+
+		if (command.isOpened == SOLS_Bool::None) // Closed
+			return pmsg;
+
+
+
+    	return pmsg;
+	}
+
 	sols::ParseMessage solsInclude(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
 		sols::ParseMessage pmsg{};
