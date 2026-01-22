@@ -56,6 +56,26 @@ int main()
 		parser.registerName(name);
 	}
 
+	{
+		sols::RegisteredName name;
+
+		name.id = "command-call";
+		name.syntax = "command";
+		name.call = SOLS_ADD_COMMAND(sols::commands::solsCmd)
+
+		parser.registerName(name);
+	}
+
+	{
+		sols::RegisteredName name;
+
+		name.id = "python-call";
+		name.syntax = "python";
+		name.call = SOLS_ADD_COMMAND(sols::commands::solsPython)
+
+		parser.registerName(name);
+	}
+
 	auto root = parser.parse();
 
 	wesi_destroy();
