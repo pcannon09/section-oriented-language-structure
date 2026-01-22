@@ -6,7 +6,7 @@
 
 #define __SOLS_CORE_BUFFSIZE 	4096
 
-SOLS_PairExecCommand sols_core_execCommand(const char *command)
+SOLS_PairExecCommand sols_core_execCommand(const char *command, const bool directOut)
 {
 	SOLS_PairExecCommand ret = {0};
 
@@ -24,7 +24,15 @@ SOLS_PairExecCommand sols_core_execCommand(const char *command)
 	char buff[__SOLS_CORE_BUFFSIZE];
 
 	while (fgets(buff, __SOLS_CORE_BUFFSIZE, file))
+	{
 		cstr_add(&total, buff);
+		
+		if (directOut)
+		{
+			printf("%s", buff);
+			fflush(stdout);
+		}
+	}
 
 	char *totalCpy = strdup(total.data);
 
