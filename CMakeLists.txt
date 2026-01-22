@@ -25,6 +25,10 @@ else()
 	set(__SQT_USER_HOME_DIR "$ENV{HOME}")
 endif()
 
+find_package(Python3 COMPONENTS Interpreter Development REQUIRED)
+
+add_definitions(-DDEFAULT_PYTHON_PATH="${Python3_EXECUTABLE}")
+
 include("${CMAKE_CURRENT_SOURCE_DIR}/cmake/cmake_source_info.cmake")
 
 set(SOLS_USER_HOME_DIR ${__SOLS_USER_HOME_DIR})
