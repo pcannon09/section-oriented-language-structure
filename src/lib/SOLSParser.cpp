@@ -200,6 +200,7 @@ namespace sols
 
 		commandSend.file = this->input;
 		commandSend.posStart = sectionStart;
+		commandSend.node = node;
 
 		const RegisteredName &regName = this->getNameBySyntax(node.name);
 		ParseMessage commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
@@ -220,7 +221,8 @@ namespace sols
 			this->expect('=');
 			this->skipWhitespace();
 
-			node.attrs[key] = this->parseStr();
+			const std::string &parsedKeyVal = this->parseStr();
+			node.attrs[key] = parsedKeyVal;
 
 			this->skipWhitespace();
 		}
@@ -267,6 +269,8 @@ namespace sols
 		this->parseName();
 		if (this->expect('>'))
 			commandSend.isOpened = SOLS_Bool::False;
+
+		commandSend.node = node;
 
 		// Run again if the command call needs to be executed again;
 		// 	* Developer can disable it when developing the software with SOLS
@@ -333,5 +337,7 @@ namespace sols
 	{ return this->regNames; }
 }
 
-#undef __SOLS_PARSER_COMMAND_CALL
+#ifdef __SOLS_PARSER_COMMAND_CALL
+# 	undef __SOLS_PARSER_COMMAND_CALL
+#endif // defined(__SOLS_PARSER_COMMAND_CALL)
 

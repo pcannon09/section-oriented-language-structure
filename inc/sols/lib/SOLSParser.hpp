@@ -41,6 +41,8 @@ namespace sols
 
 		std::string file;
 		std::string commandName;
+
+		Node node;
 	} RegisterCommand;
 
 	typedef struct RegisteredName
