@@ -26,59 +26,60 @@ namespace sols::defcommands
 {
 	namespace _utils
 	{
-		std::string parseNonRawString(const std::string &str, const std::string varName, const std::string varVal)
+		std::string parseNonRawString(
+    			const std::string& str,
+    			const std::map<std::string, std::string>& replacements)
 		{
-			std::string formed;
-			std::string accVarName;
+    		std::string result;
+    		std::string var;
 
-			std::pair<size_t, size_t> posPoints;
+    		bool opened = false;
 
-			bool opened = false;
+    		for (size_t i = 0; i < str.size(); ++i)
+    		{
+        		char c = str[i];
 
-			for (size_t i = 0 ; i < str.size() ; i++)
-			{
-				const auto &c = str[i];
+        		if (c == '%')
+        		{
+            		if (opened)
+            		{
+                		// closing `%`
+                		const auto &it = replacements.find(var);
 
-				if (c == '%')
-				{
-					if (!opened)
-					{
-						opened = true;
-						posPoints.first = i;
+                		if (it != replacements.end())
+                		{
+                    		result += it->second;
+                		}
 
-						continue;
-					}
+                		else
+                		{
+                    		// Unknown variable; keep original text
+                    		result += "%" + var + "%";
+                		}
 
-					else
-					{
-						opened = false;
-						posPoints.second = i;
-					}
-				}
+                		var.clear();
+                		opened = false;
+            		}
 
-				if (opened)
-				{
-					if (std::isspace(c))
-						opened = false;
+            		else
+            		{
+                		// opening `%`
+                		opened = true;
+                		var.clear();
+            		}
 
-					accVarName += c;
+            		continue;
+        		}
 
-					if (accVarName == varName)
-					{
-						formed.replace(
-							posPoints.first,
-							posPoints.second - posPoints.first,
-							varVal
-						);
-					}
-				}
+        		if (opened) var += c;
+        		else result += c;
+    		}
 
-				else formed += c;
-			}
+    		// Unmatched opening `%`
+    		if (opened)
+        		result += "%" + var;
 
-			ciof::print(formed);
-
-			return formed;
+    		return result;
 		}
 	}
 
@@ -240,7 +241,12 @@ namespace sols::defcommands
 		for (const auto &replace : replaceChs)
 			cstr_replaceAll(&replacement, replace.first.c_str(), replace.second.c_str());
 
-		totalPrint = replacement.data;
+		RegisterCommand commandNonConst = command;
+
+		totalPrint = _utils::parseNonRawString(
+					replacement.data,
+					commandNonConst.node.attrs
+				);
 
 		ciof::echo(totalPrint);
 

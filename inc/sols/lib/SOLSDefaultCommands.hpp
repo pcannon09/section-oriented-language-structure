@@ -12,7 +12,10 @@ namespace sols::defcommands
 {
 	namespace _utils
 	{
-		std::string parseNonRawString(const std::string &str, const std::string varName, const std::string varVal);
+		std::string parseNonRawString(
+    			const std::string &str,
+    			const std::map<std::string, std::string> &replacement
+    			);
 	}
 
 	sols::ParseMessage solsPython(const RegisterCommand &command, const std::vector<std::string> &args);
