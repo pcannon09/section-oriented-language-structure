@@ -9,8 +9,6 @@
 
 int main()
 {
-	sols::defcommands::_utils::parseNonRawString("Hello world%welcome", "welcome", ", Paul");
-
 	wesi_init();
 	char *newRgb = wesi_rgbSet(255, 255, 20);
 
