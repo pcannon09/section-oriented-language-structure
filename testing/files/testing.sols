@@ -1,4 +1,8 @@
-<print a = "USER: Good, what about you?">
-Hello, how's your day?\n
-$a
+<print a = "It's been good" b = "Cool">
+Hello, how's your day? %b%, %a%
 </print>
+
+<command>
+echo "Hello from your shell"
+</command>
+
