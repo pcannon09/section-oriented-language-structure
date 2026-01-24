@@ -24,11 +24,15 @@ set(SOLS_CORE_SOURCES_LIBS
 set(SOLS_LIB_HEADERS_LIBS
 		${INC_DIR}/lib/SOLSParser.hpp
 		${INC_DIR}/lib/SOLSDefaultCommands.hpp
+
+		${INC_DIR}/lib/predefines/SOLSFunction.hpp
 )
 
 set(SOLS_LIB_SOURCES_LIBS
 		${SRC_DIR}/lib/SOLSParser.cpp
 		${SRC_DIR}/lib/SOLSDefaultCommands.cpp
+
+		${SRC_DIR}/lib/predefines/SOLSFunction.cpp
 )
 
 set(SOLS_SOURCES
