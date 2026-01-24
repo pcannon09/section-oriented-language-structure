@@ -2,9 +2,17 @@
 #define INCLUDE_CORE_SOLS_PARSERCONF_H_
 
 #include <string>
+#include <vector>
+#include <functional>
+#include <map>
 
 namespace sols
 {
+	namespace predefined
+	{
+		inline constexpr std::string varName = "_Name";
+	}
+
 	enum class TokType
 	{
 		OpenSection, 			// <
@@ -34,6 +42,30 @@ namespace sols
 		None
 	};
 
+	typedef struct Node 
+	{
+		std::string name; // Command name <{command}>
+		std::string text;
+		std::string content; // Content inside;
+							 // <command>{CONTENT_HERE}</command>
+
+		std::map<std::string, std::string> attrs; // Variable set;
+												  // var = "something"
+		std::vector<Node> children; // Sub-nodes
+	} Node;
+
+	typedef struct RegisterCommand
+	{
+		int posStart;
+
+		SOLS_Bool isOpened = SOLS_Bool::None;
+
+		std::string file;
+		std::string commandName;
+
+		Node node;
+	} RegisterCommand;
+
 	typedef struct ParseMessage
 	{
 		ParserMessageType type;
@@ -47,6 +79,11 @@ namespace sols
 
 		std::string message;
 		std::string file;
+
+		std::pair<
+			std::string,
+			std::function<ParseMessage(const RegisterCommand &command, const std::vector<std::string>&)>
+			> call;
 	} ParseMessage;
 
 	template <typename T>
