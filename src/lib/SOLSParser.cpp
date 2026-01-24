@@ -1,13 +1,15 @@
 #include "ciof/ciof.hpp"
 
 #include "../../inc/sols/lib/SOLSParser.hpp"
+#include "../../inc/sols/lib/predefines/SOLSFunction.hpp"
 
 #include "../../inc/sols/core/wesi/WESI.h"
+#include "../../inc/sols/SOLSpredefines.h"
 
 #include <algorithm>
 #include <cctype>
 
-#define __SOLS_PARSER_COMMAND_CALL(name) name.call(commandSend, {node.content})
+#define __SOLS_PARSER_COMMAND_CALL(name) name.call(commandSend, { node.content })
 #define __SOLS_RETURN_DEBUG(statement, ret) \
 	statement \
 	return ret
@@ -16,10 +18,23 @@ namespace sols
 {
 	// PROTECTED //
 	InitInfoError Parser::__init()
-	{ return { true, "" }; }
+	{
+		this->function = new Function(id + "_function");
+		this->function->setFileInput(this->input);
+		this->function->attachParser(this);
+
+		return { true, "" };
+	}
 
 	InitInfoError Parser::__end()
-	{ return { true, "" }; }
+	{
+		if (!this->function)
+			return { false, "Could not free `function`; Variable is NULL" };
+
+		else SOLS_FREE(this->function);
+
+		return { true, "" };
+	}
 
 	// PUBLIC //
 	Parser::Parser(const std::string &id, const std::string &input, const ParserConfig &conf)
@@ -148,6 +163,45 @@ namespace sols
     			this->parseElem();
     	}
 
+		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION)
+		{
+    		if (!commandRet.message.empty() && this->function)
+    		{
+
+				const std::string content = this->input.substr(
+        			commandRet.lineRange.first,
+        			commandRet.lineRange.second - commandRet.lineRange.first
+    			);
+
+				this->input.erase(
+        			commandRet.lineRange.first,
+        			commandRet.lineRange.second - commandRet.lineRange.first
+    			);
+
+				sols::FunctionProps prop;
+				prop.name = commandRet.message;
+				prop.content = content;
+
+    			this->function->declare(prop);
+				this->pos = commandRet.lineRange.second;
+    		}
+
+		}
+
+		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_FUNCTIONCALL)
+    	{
+    		if (!commandRet.message.empty() && this->function)
+    		{
+				this->input.erase(
+        			commandRet.lineRange.first,
+        			commandRet.lineRange.second - commandRet.lineRange.first
+    			);
+
+				this->pos = commandRet.lineRange.second;
+    			this->function->call(commandRet.message);
+    		}
+    	}
+
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR)
 		{
  			WESI_Type setType = WESIType_Fatal;
@@ -163,6 +217,18 @@ namespace sols
 
 			wesi_throw(setType, commandRet.message.c_str(), true);
 		}
+	}
+
+	void Parser::setInput(const std::string &inp)
+	{
+		this->inputSave = this->input;
+		this->input = inp;
+	}
+
+	void Parser::restoreInput()
+	{
+		this->input = this->inputSave;
+		this->inputSave = "";
 	}
 
 	Node Parser::parseElem()

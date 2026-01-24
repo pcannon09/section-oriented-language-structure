@@ -3,7 +3,6 @@
 
 #include <string>
 #include <vector>
-#include <map>
 #include <functional>
 
 #include "../core/SOLS_parserConf.hpp"
@@ -13,6 +12,8 @@
 // NOTE: 1 is reserved for default error
 #define SOLS_EXECCOMMAND_RETACTION_REPLACELINES 		2
 #define SOLS_EXECCOMMAND_RETACTION_NOCALL 				3
+#define SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION			4
+#define SOLS_EXECCOMMAND_RETACTION_FUNCTIONCALL 		5
 
 #define SOLS_ADD_COMMAND(func) \
 	[](const sols::RegisterCommand &cmd, \
@@ -21,29 +22,7 @@
 
 namespace sols
 {
-	typedef struct Node 
-	{
-		std::string name; // Command name <{command}>
-		std::string text;
-		std::string content; // Content inside;
-							 // <command>{CONTENT_HERE}</command>
-
-		std::map<std::string, std::string> attrs; // Variable set;
-												  // var = "something"
-		std::vector<Node> children; // Sub-nodes
-	} Node;
-
-	typedef struct RegisterCommand
-	{
-		int posStart;
-
-		SOLS_Bool isOpened = SOLS_Bool::None;
-
-		std::string file;
-		std::string commandName;
-
-		Node node;
-	} RegisterCommand;
+	class Function;
 
 	typedef struct RegisteredName
 	{
@@ -66,6 +45,7 @@ namespace sols
 	private:
 		std::string id;
 		std::string input;
+		std::string inputSave;
 		std::string parsedStr;
 
 		size_t pos = 0;
@@ -74,6 +54,8 @@ namespace sols
 		std::vector<RegisteredName> regNames;
 
 		ParserConfig config;
+
+		Function *function;
 
 	protected:
 		InitInfoError initErrorMsg;
@@ -105,6 +87,9 @@ namespace sols
 		bool registerName(const RegisteredName &name);
 
 		void exception(const unsigned int line, const unsigned int &pos, const std::string &text, const std::string &message);
+
+		void setInput(const std::string &inp);
+		void restoreInput();
 
 		std::string parseName();
 		std::string parseStr();
