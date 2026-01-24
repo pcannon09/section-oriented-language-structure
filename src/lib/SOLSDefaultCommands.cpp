@@ -1,7 +1,6 @@
 #include <filesystem>
 #include <fstream>
 #include <sstream>
-#include <algorithm>
 
 #include "../../inc/sols/SOLSpredefines.h"
 
@@ -27,8 +26,8 @@ namespace sols::defcommands
 	namespace _utils
 	{
 		std::string parseNonRawString(
-    			const std::string& str,
-    			const std::map<std::string, std::string>& replacements)
+    			const std::string &str,
+    			const std::map<std::string, std::string> &replacements)
 		{
     		std::string result;
     		std::string var;
@@ -47,15 +46,10 @@ namespace sols::defcommands
                 		const auto &it = replacements.find(var);
 
                 		if (it != replacements.end())
-                		{
                     		result += it->second;
-                		}
 
-                		else
-                		{
-                    		// Unknown variable; keep original text
-                    		result += "%" + var + "%";
-                		}
+                    	// Unknown variable; keep original text
+                		else result += "%" + var + "%";
 
                 		var.clear();
                 		opened = false;
@@ -131,20 +125,7 @@ namespace sols::defcommands
 		pmsg = solsCmd(command, totalArgs);
 
 		return pmsg;
-	}
-
-	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args)
-	{
-    	sols::ParseMessage pmsg{};
-    	pmsg.code = 0;
-
-		if (command.isOpened == SOLS_Bool::None) // Closed
-			return pmsg;
-
-
-
-    	return pmsg;
-	}
+	}	
 
 	sols::ParseMessage solsCall(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
@@ -210,6 +191,60 @@ namespace sols::defcommands
 		return pmsg;
 	}
 
+	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args)
+	{
+    	sols::ParseMessage pmsg{};
+    	pmsg.code = 0;
+
+		RegisterCommand commandNonConst = command;
+    	
+		std::string totalPrint;
+
+		for (const auto &a : args)
+		{ totalPrint += a; }
+
+		std::string idAccess;
+
+		// Access with ID for function name in the params
+		{
+			for (const auto &a : commandNonConst.node.attrs)
+			{
+				ciof::print(a.first);
+
+            	if (a.first == sols::predefined::varName)
+                	idAccess = a.second;
+            }
+		}
+
+		const std::string newTotalPrint = _utils::parseNonRawString(
+				totalPrint,
+				commandNonConst.node.attrs
+				);
+
+		sols::RegisteredName name;
+
+    	const std::string openTag  = ciof::format("<%1", command.commandName);
+    	const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
+
+    	// Find opening tag
+    	const size_t &start = command.file.find(openTag);
+
+    	if (start == std::string::npos)
+        	return pmsg;
+
+    	// Find closing tag after opening
+    	size_t end = command.file.find(closeTag, start);
+
+    	if (end != std::string::npos) end += closeTag.size(); // include: </comment>
+    	else end = command.file.size(); // Remove until EOF
+
+    	pmsg.lineRange = { start, end };
+		pmsg.code = SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION;
+		pmsg.message = idAccess;
+
+    	return pmsg;
+	}
+
 	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
     	sols::ParseMessage pmsg{};
@@ -238,14 +273,15 @@ namespace sols::defcommands
 
 		cstr_set(&replacement, totalPrint.c_str());
 
+		// Replace with the `replaceChs` map
 		for (const auto &replace : replaceChs)
 			cstr_replaceAll(&replacement, replace.first.c_str(), replace.second.c_str());
 
 		RegisterCommand commandNonConst = command;
 
 		totalPrint = _utils::parseNonRawString(
-					replacement.data,
-					commandNonConst.node.attrs
+				replacement.data,
+				commandNonConst.node.attrs
 				);
 
 		ciof::echo(totalPrint);
