@@ -7,26 +7,23 @@
 
 #include "../inc/sols/lib/SOLSDefaultCommands.hpp"
 
-int main()
-{
-	wesi_init();
-	char *newRgb = wesi_rgbSet(255, 255, 20);
+int main() {
+  	wesi_init();
+  	char *newRgb = wesi_rgbSet(255, 255, 20);
 
-	SOLS_C_FREE(newRgb);
+  	SOLS_C_FREE(newRgb);
 
-	std::string file = R"(
+  	std::string file = R"(
 <include>./testing/files/testing.sols</include>
 <comment> <print>Hello world\n</print> </comment>
 <print>Goodbye world\n</print>
 )";
 
-	const sols::ParserConfig &parserConfig = {
-		.automaticLines = true
-	};
+  	const sols::ParserConfig &parserConfig = {.automaticLines = true};
 
-	sols::Parser parser("main-parser", file, parserConfig);
+  	sols::Parser parser("main-parser", file, parserConfig);
 
-	{
+  	{
 		sols::RegisteredName name;
 
 		name.id = "comment";
@@ -34,9 +31,9 @@ int main()
 		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsComment)
 
 		parser.registerName(name);
-	}
+  	}
 
-	{
+  	{
 		sols::RegisteredName name;
 
 		name.id = "print";
@@ -44,9 +41,9 @@ int main()
 		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsPrint)
 
 		parser.registerName(name);
-	}
+  	}
 
-	{
+  	{
 		sols::RegisteredName name;
 
 		name.id = "include";
@@ -54,9 +51,29 @@ int main()
 		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsInclude)
 
 		parser.registerName(name);
-	}
+  	}
 
-	{
+  	{
+		sols::RegisteredName name;
+
+		name.id = "call";
+		name.syntax = "call";
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsCall)
+
+		parser.registerName(name);
+  	}
+
+  	{
+		sols::RegisteredName name;
+
+		name.id = "function-definition";
+		name.syntax = "function";
+		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsFunction)
+
+		parser.registerName(name);
+  	}
+
+  	{
 		sols::RegisteredName name;
 
 		name.id = "command-call";
@@ -64,9 +81,9 @@ int main()
 		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsCmd)
 
 		parser.registerName(name);
-	}
+  	}
 
-	{
+  	{
 		sols::RegisteredName name;
 
 		name.id = "python-call";
@@ -74,11 +91,11 @@ int main()
 		name.call = SOLS_ADD_COMMAND(sols::defcommands::solsPython)
 
 		parser.registerName(name);
-	}
+  	}
 
-	auto root = parser.parse();
+  	auto root = parser.parse();
 
-	wesi_destroy();
+  	wesi_destroy();
 
-	return 0;
+  	return 0;
 }
