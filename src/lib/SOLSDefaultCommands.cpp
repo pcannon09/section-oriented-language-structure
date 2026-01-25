@@ -7,6 +7,7 @@
 #include "../../inc/sols/core/SOLS_callSystemCmd.h"
 
 #include "../../inc/sols/lib/SOLSDefaultCommands.hpp"
+#include "../../inc/sols/lib/predefines/SOLSFunction.hpp"
 
 #include "ciof/ciof.hpp"
 
@@ -17,7 +18,7 @@ extern "C"
 
 namespace fs = std::filesystem;
 
-#define SOLS_COMMAND_ERRORCODE_INFOFAIL    	 	-2
+#define SOLS_COMMAND_ERRORCODE_INFOFAIL		 	-2
 #define SOLS_COMMAND_ERRORCODE_NEEDPROVIDE 		-3
 #define SOLS_COMMAND_ERRORCODE_UNKNONWPATH 		-4
 
@@ -25,55 +26,75 @@ namespace sols::defcommands
 {
 	namespace _utils
 	{
-		std::string parseNonRawString(
-    			const std::string &str,
-    			const std::map<std::string, std::string> &replacements)
+		std::pair<int, int> getStartEnd(const RegisterCommand &command)
 		{
-    		std::string result;
-    		std::string var;
+			const std::string openTag  = ciof::format("<%1", command.commandName);
+			const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
 
-    		bool opened = false;
+			// Find opening tag
+			const size_t &start = command.file.find(openTag);
 
-    		for (size_t i = 0; i < str.size(); ++i)
-    		{
-        		char c = str[i];
+			if (start == std::string::npos)
+				return { -1, -1 };
 
-        		if (c == '%')
-        		{
-            		if (opened)
-            		{
-                		// closing `%`
-                		const auto &it = replacements.find(var);
+			// Find closing tag after opening
+			size_t end = command.file.find(closeTag, start);
 
-                		if (it != replacements.end())
-                    		result += it->second;
+			if (end != std::string::npos) end += closeTag.size(); // include: </comment>
+			else end = command.file.size(); // Remove until EOF
 
-                    	// Unknown variable; keep original text
-                		else result += "%" + var + "%";
+			return { start, end };
+		}
 
-                		var.clear();
-                		opened = false;
-            		}
+		std::string parseNonRawString(
+				const std::string &str,
+				const std::map<std::string, std::string> &replacements)
+		{
+			std::string result;
+			std::string var;
 
-            		else
-            		{
-                		// opening `%`
-                		opened = true;
-                		var.clear();
-            		}
+			bool opened = false;
 
-            		continue;
-        		}
+			for (size_t i = 0; i < str.size(); ++i)
+			{
+				char c = str[i];
 
-        		if (opened) var += c;
-        		else result += c;
-    		}
+				if (c == '%')
+				{
+					if (opened)
+					{
+						// closing `%`
+						const auto &it = replacements.find(var);
 
-    		// Unmatched opening `%`
-    		if (opened)
-        		result += "%" + var;
+						if (it != replacements.end())
+							result += it->second;
 
-    		return result;
+						// Unknown variable; keep original text
+						else result += "%" + var + "%";
+
+						var.clear();
+						opened = false;
+					}
+
+					else
+					{
+						// opening `%`
+						opened = true;
+						var.clear();
+					}
+
+					continue;
+				}
+
+				if (opened) var += c;
+				else result += c;
+			}
+
+			// Unmatched opening `%`
+			if (opened)
+				result += "%" + var;
+
+			return result;
 		}
 	}
 
@@ -129,15 +150,49 @@ namespace sols::defcommands
 
 	sols::ParseMessage solsCall(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
-    	sols::ParseMessage pmsg{};
-    	pmsg.code = 0;
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
 
-		if (command.isOpened == SOLS_Bool::None) // Closed
+		if (command.isOpened == SOLS_Bool::True) // Closed
 			return pmsg;
 
+		RegisterCommand commandNonConst = command;
 
+		std::string totalPrint;
 
-    	return pmsg;
+		for (const auto &a : args)
+		{ totalPrint += a; }
+
+		std::string idAccess; // Function name
+
+		// Access with ID for function name in the params
+		for (const auto &a : commandNonConst.node.attrs)
+		{
+			if (a.first == sols::predefined::varName)
+			{
+				idAccess = a.second;
+
+				break;
+			}
+		}
+
+		std::pair<int, int> range = _utils::getStartEnd(command);
+
+		if (command.function)
+		{
+			pmsg.lineRange = range;
+			pmsg.col = command.posStart;
+
+			commandNonConst.function->call(command, pmsg, idAccess);
+		}
+
+		else
+		{
+			// TODO:
+			// DO ERROR
+		}
+
+		return pmsg;
 	}
 
 	sols::ParseMessage solsInclude(const RegisterCommand &command, const std::vector<std::string> &args)
@@ -164,21 +219,10 @@ namespace sols::defcommands
 			return pmsg;
 		}
 
-    	const std::string openTag  = ciof::format("<%1", command.commandName);
-    	const size_t &start = command.file.find(openTag);
-    	const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
+		std::pair<int, int> range = _utils::getStartEnd(command);
 
-    	if (start == std::string::npos)
-        	return pmsg;
-
-    	// Find closing tag after opening
-    	size_t end = command.file.find(closeTag, start);
-
-    	if (end != std::string::npos) end += closeTag.size(); // include: </comment>
-    	else end = command.file.size(); // Remove until EOF
-
-    	pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
-    	pmsg.lineRange = { start, end };
+		pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
+		pmsg.lineRange = { range.first, range.second};
 
 		std::ifstream fileContent(args[0]);
 
@@ -193,27 +237,30 @@ namespace sols::defcommands
 
 	sols::ParseMessage solsFunction(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
-    	sols::ParseMessage pmsg{};
-    	pmsg.code = 0;
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
+
+		if (command.isOpened == SOLS_Bool::True)
+			return pmsg;
 
 		RegisterCommand commandNonConst = command;
-    	
+		
 		std::string totalPrint;
 
 		for (const auto &a : args)
 		{ totalPrint += a; }
 
-		std::string idAccess;
+		std::string idAccess; // Function name
 
 		// Access with ID for function name in the params
+		for (const auto &a : commandNonConst.node.attrs)
 		{
-			for (const auto &a : commandNonConst.node.attrs)
+			if (a.first == sols::predefined::varName)
 			{
-				ciof::print(a.first);
+				idAccess = a.second;
 
-            	if (a.first == sols::predefined::varName)
-                	idAccess = a.second;
-            }
+				break;
+			}
 		}
 
 		const std::string newTotalPrint = _utils::parseNonRawString(
@@ -223,32 +270,19 @@ namespace sols::defcommands
 
 		sols::RegisteredName name;
 
-    	const std::string openTag  = ciof::format("<%1", command.commandName);
-    	const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
+		std::pair<int, int> range = _utils::getStartEnd(command);
 
-    	// Find opening tag
-    	const size_t &start = command.file.find(openTag);
-
-    	if (start == std::string::npos)
-        	return pmsg;
-
-    	// Find closing tag after opening
-    	size_t end = command.file.find(closeTag, start);
-
-    	if (end != std::string::npos) end += closeTag.size(); // include: </comment>
-    	else end = command.file.size(); // Remove until EOF
-
-    	pmsg.lineRange = { start, end };
-		pmsg.code = SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION;
+		pmsg.lineRange = { range.first, range.second };
+		pmsg.command = SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION;
 		pmsg.message = idAccess;
 
-    	return pmsg;
+		return pmsg;
 	}
 
 	sols::ParseMessage solsPrint(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
-    	sols::ParseMessage pmsg{};
-    	pmsg.code = 0;
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
 
 		if (command.isOpened == SOLS_Bool::None) // Closed
 			return pmsg;
@@ -288,36 +322,24 @@ namespace sols::defcommands
 
 		cstr_destroy(&replacement);
 
-    	return pmsg;
+		return pmsg;
 	}
 
 	sols::ParseMessage solsComment(const RegisterCommand &command, const std::vector<std::string> &args)
 	{
-    	sols::ParseMessage pmsg{};
-    	pmsg.code = 0;
+		sols::ParseMessage pmsg{};
+		pmsg.code = 0;
 
-    	if (command.isOpened != SOLS_Bool::True)
-        	return pmsg;
+		if (command.isOpened != SOLS_Bool::True)
+			return pmsg;
 
-    	const std::string openTag  = ciof::format("<%1", command.commandName);
-    	const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
+		std::pair<int, int> range = _utils::getStartEnd(command);
 
-    	// Find opening tag
-    	const size_t &start = command.file.find(openTag);
+		pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
+		pmsg.lineRange = { range.first, range.second };
+		pmsg.message = "";
 
-    	if (start == std::string::npos)
-        	return pmsg;
-
-    	// Find closing tag after opening
-    	size_t end = command.file.find(closeTag, start);
-
-    	if (end != std::string::npos) end += closeTag.size(); // include: </comment>
-    	else end = command.file.size(); // Remove until EOF
-
-    	pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
-    	pmsg.lineRange = { start, end };
-
-    	return pmsg;
+		return pmsg;
 	}
 }
 
