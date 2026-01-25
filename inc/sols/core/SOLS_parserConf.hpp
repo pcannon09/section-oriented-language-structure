@@ -8,9 +8,13 @@
 
 namespace sols
 {
+	class Function;
+
 	namespace predefined
 	{
-		inline constexpr std::string varName = "_Name";
+		// I{varName}; 
+		// I stands for `Internal`
+		inline constexpr std::string varName = "I_Name";
 	}
 
 	enum class TokType
@@ -64,6 +68,7 @@ namespace sols
 		std::string commandName;
 
 		Node node;
+		Function *function = nullptr;
 	} RegisterCommand;
 
 	typedef struct ParseMessage

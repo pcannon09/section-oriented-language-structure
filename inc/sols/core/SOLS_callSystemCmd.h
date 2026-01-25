@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 # 	define __SYSCMD_EXTERNC_OPEN 		extern "C" {
-# 	define __SYSCMD_EXTERNC_CLOSE 	}
+# 	define __SYSCMD_EXTERNC_CLOSE 		}
 #else
 # 	define __SYSCMD_EXTERNC_OPEN
 # 	define __SYSCMD_EXTERNC_CLOSE

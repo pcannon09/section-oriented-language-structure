@@ -2,8 +2,8 @@
 #define INCLUDE_WESI_WESI_H_
 
 #ifdef __cplusplus
-# 	define __WESI_EXTERNC_OPEN 		extern "C" {
-# 	define __WESI_EXTERNC_CLOSE 	}
+# 	define __WESI_EXTERNC_OPEN 			extern "C" {
+# 	define __WESI_EXTERNC_CLOSE 		}
 #else
 # 	define __WESI_EXTERNC_OPEN
 # 	define __WESI_EXTERNC_CLOSE

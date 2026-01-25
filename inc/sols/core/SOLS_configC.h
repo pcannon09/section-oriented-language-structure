@@ -3,7 +3,7 @@
 
 #ifdef __cplusplus
 # 	define __CONFIGC_EXTERNC_OPEN 		extern "C" {
-# 	define __CONFIGC_EXTERNC_CLOSE 	}
+# 	define __CONFIGC_EXTERNC_CLOSE 		}
 #else
 # 	define __CONFIGC_EXTERNC_OPEN
 # 	define __CONFIGC_EXTERNC_CLOSE
