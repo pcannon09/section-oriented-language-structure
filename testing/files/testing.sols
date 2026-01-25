@@ -1,17 +1,9 @@
-<comment>
-<print a = "It's been good" b = "Cool">
-Hello, how's your day? %b%, %a%
-</print>
+<function I_Name = "sayHello">
+	<print>Hello, this is a welcome inside a function\n</print>
 
-<command>
-echo "Hello from your shell"
-</command>
-</comment>
+	<command>
+		echo "wassup"
+	</command>
 
-<function _Name = "sayHello">
-	<print>Hello, this is a welcome inside a function</print>
-	<command>echo "Howdy from your default terminal"<command>
 </function>
-
-<call _Name = "sayHello"></call>
 
