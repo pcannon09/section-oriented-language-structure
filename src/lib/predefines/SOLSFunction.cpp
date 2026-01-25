@@ -1,8 +1,11 @@
 #include "../../../inc/sols/lib/predefines/SOLSFunction.hpp"
 
+#include "ciof/ciof.hpp"
+
 namespace sols
 {
 	Function::Function(const std::string &id)
+		: id(id)
 	{
 	}
 
@@ -49,17 +52,24 @@ namespace sols
 		return "";
 	}
 
-	bool Function::call(const std::string &name)
+	bool Function::call(RegisterCommand command, sols::ParseMessage retMsg, const std::string &name)
 	{
 		const std::string &functionContent = this->get(name);
 
 		if (functionContent.empty())
 			return false;
 
-		this->parser->setInput(functionContent);
-		this->parser->parseName();
-		this->parser->restoreInput();
-		
+		ciof::print(this->parser->input.substr(retMsg.lineRange.first, retMsg.lineRange.second));
+		ciof::print("\n\n\n");
+
+		this->parser->input.replace(
+				retMsg.lineRange.first,
+				retMsg.lineRange.second,
+				functionContent
+				);
+
+		ciof::print(this->parser->input);
+
 		return true;
 	}
 

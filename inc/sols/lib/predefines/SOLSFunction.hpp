@@ -33,7 +33,7 @@ namespace sols
 		bool attachParser(Parser *parser);
 		bool declare(const FunctionProps &prop);
 
-		bool call(const std::string &name);
+		bool call(RegisterCommand command, sols::ParseMessage retMsg, const std::string &name);
 
 		std::string get(const std::string &name);
 		std::string getFull(const std::string &name);
