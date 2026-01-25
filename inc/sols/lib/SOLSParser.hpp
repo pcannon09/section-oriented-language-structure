@@ -44,7 +44,6 @@ namespace sols
 	{
 	private:
 		std::string id;
-		std::string input;
 		std::string inputSave;
 		std::string parsedStr;
 
@@ -65,6 +64,8 @@ namespace sols
 		virtual InitInfoError __end();
 
 	public:
+		std::string input;
+
 		explicit Parser(const std::string &id, const std::string &input, const ParserConfig &conf);
 		~Parser();
 
@@ -95,7 +96,7 @@ namespace sols
 		std::string parseStr();
 
 		std::string getID() const;
-		std::string getInput() const;
+
 		std::vector<RegisteredName> getNames() const;
 	};
 }

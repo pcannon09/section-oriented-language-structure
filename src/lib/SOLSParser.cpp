@@ -97,7 +97,8 @@ namespace sols
 	{
 		std::string str;
 
-		while (std::isalnum(this->peek()) || this->peek() == '_' || this->peek() == '-')
+		while (std::isalnum(this->peek()) ||
+				this->peek() == '_' || this->peek() == '-')
 			str += this->get();
 
 		return str;
@@ -151,56 +152,42 @@ namespace sols
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_REPLACELINES)
 		{
 			this->input.replace(
-        		commandRet.lineRange.first,
-        		commandRet.lineRange.second - commandRet.lineRange.first,
-        		commandRet.message
-    		);
+				commandRet.lineRange.first,
+				commandRet.lineRange.second - commandRet.lineRange.first,
+				commandRet.message
+			);
 
-    		// Continue parsing after the removed block
-    		this->pos = commandRet.lineRange.first;
-    		
-    		if (!commandRet.message.empty())
-    			this->parseElem();
-    	}
+			// Continue parsing after the removed block
+			this->pos = commandRet.lineRange.first;
+			this->parseElem();
+		}
 
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION)
 		{
-    		if (!commandRet.message.empty() && this->function)
-    		{
-
+			if (this->function)
+			{
 				const std::string content = this->input.substr(
-        			commandRet.lineRange.first,
-        			commandRet.lineRange.second - commandRet.lineRange.first
-    			);
-
-				this->input.erase(
-        			commandRet.lineRange.first,
-        			commandRet.lineRange.second - commandRet.lineRange.first
-    			);
+					commandRet.lineRange.first,
+					commandRet.lineRange.second - commandRet.lineRange.first
+				);
 
 				sols::FunctionProps prop;
-				prop.name = commandRet.message;
-				prop.content = content;
+				prop.name = commandRet.message; // Function name
+				prop.content = content; // Inner function comment
 
-    			this->function->declare(prop);
-				this->pos = commandRet.lineRange.second;
-    		}
+				this->function->declare(prop);
 
-		}
+				// Erase the needed //
 
-		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_FUNCTIONCALL)
-    	{
-    		if (!commandRet.message.empty() && this->function)
-    		{
 				this->input.erase(
-        			commandRet.lineRange.first,
-        			commandRet.lineRange.second - commandRet.lineRange.first
-    			);
+					commandRet.lineRange.first,
+					commandRet.lineRange.second - commandRet.lineRange.first
+				);
 
-				this->pos = commandRet.lineRange.second;
-    			this->function->call(commandRet.message);
-    		}
-    	}
+				this->pos = commandRet.lineRange.first;
+				this->parseElem();
+			}
+		}
 
 		else if (commandRet.command == SOLS_EXECCOMMAND_RETACTION_UNKNOWNERR)
 		{
@@ -235,6 +222,8 @@ namespace sols
 	{
 		RegisterCommand commandSend;
 
+		this->skipWhitespace();
+
 		const size_t &sectionStart = this->pos;
 
 		if (this->expect('<'))
@@ -267,6 +256,7 @@ namespace sols
 		commandSend.file = this->input;
 		commandSend.posStart = sectionStart;
 		commandSend.node = node;
+		commandSend.function = this->function;
 
 		const RegisteredName &regName = this->getNameBySyntax(node.name);
 		ParseMessage commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
@@ -337,6 +327,7 @@ namespace sols
 			commandSend.isOpened = SOLS_Bool::False;
 
 		commandSend.node = node;
+		commandSend.function = this->function;
 
 		// Run again if the command call needs to be executed again;
 		// 	* Developer can disable it when developing the software with SOLS
@@ -395,9 +386,6 @@ namespace sols
 
 	std::string Parser::getID() const
 	{ return this->id; }
-
-	std::string Parser::getInput() const
-	{ return this->input; }
 
 	std::vector<RegisteredName> Parser::getNames() const
 	{ return this->regNames; }
