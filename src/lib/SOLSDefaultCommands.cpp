@@ -28,8 +28,8 @@ namespace sols::defcommands
 	{
 		std::pair<int, int> getStartEnd(const RegisterCommand &command)
 		{
-			const std::string openTag  = ciof::format("<%1", command.commandName);
-			const std::string closeTag = ciof::format("</%1%%2", command.commandName, ">");
+			const std::string &openTag  = ciof::format("<%1", command.commandName);
+			const std::string &closeTag = ciof::format("</%1%%2", command.commandName, ">");
 
 			// Find opening tag
 			const size_t &start = command.file.find(openTag);
@@ -40,7 +40,27 @@ namespace sols::defcommands
 			// Find closing tag after opening
 			size_t end = command.file.find(closeTag, start);
 
-			if (end != std::string::npos) end += closeTag.size(); // include: </comment>
+			if (end != std::string::npos) end += closeTag.size(); // include: </{command}>
+			else end = command.file.size(); // Remove until EOF
+
+			return { start, end };
+		}
+
+		std::pair<int, int> getStartEndContent(const RegisterCommand &command)
+		{
+			const std::string &openTag  = ciof::format("<%1", command.commandName);
+			const std::string &closeTag = ciof::format("</%1%%2", command.commandName, ">");
+
+			// Find opening tag
+			const size_t &start = command.file.find(openTag) + openTag.size();
+
+			if (start == std::string::npos)
+				return { -1, -1 };
+
+			// Find closing tag after opening
+			size_t end = command.file.find(closeTag, start);
+
+			if (end != std::string::npos) end += closeTag.size() - 1;
 			else end = command.file.size(); // Remove until EOF
 
 			return { start, end };
@@ -153,7 +173,7 @@ namespace sols::defcommands
 		sols::ParseMessage pmsg{};
 		pmsg.code = 0;
 
-		if (command.isOpened == SOLS_Bool::True) // Closed
+		if (command.isOpened == SOLS_Bool::False) // Closed
 			return pmsg;
 
 		RegisterCommand commandNonConst = command;
@@ -176,7 +196,7 @@ namespace sols::defcommands
 			}
 		}
 
-		std::pair<int, int> range = _utils::getStartEnd(command);
+		const std::pair<int, int> &range = _utils::getStartEnd(command);
 
 		if (command.function)
 		{
@@ -240,7 +260,7 @@ namespace sols::defcommands
 		sols::ParseMessage pmsg{};
 		pmsg.code = 0;
 
-		if (command.isOpened == SOLS_Bool::True)
+		if (command.isOpened == SOLS_Bool::None)
 			return pmsg;
 
 		RegisterCommand commandNonConst = command;
@@ -270,7 +290,8 @@ namespace sols::defcommands
 
 		sols::RegisteredName name;
 
-		std::pair<int, int> range = _utils::getStartEnd(command);
+		const std::pair<int, int> &range = _utils::getStartEndContent(command);
+		ciof::print(command.file.substr(range.first, range.second));
 
 		pmsg.lineRange = { range.first, range.second };
 		pmsg.command = SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION;

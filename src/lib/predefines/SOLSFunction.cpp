@@ -40,26 +40,27 @@ namespace sols
 		return true;
 	}
 
-	std::string Function::get(const std::string &name)
+	std::pair<std::string, std::string> Function::get(const std::string &name)
 	{
 		for (const auto &p : this->props)
 		{
 			// Found with matching name
 			if (p.name == name)
-				return p.content;
+				return { p.content, p.innerContent };
 		}
 
-		return "";
+		return { "", "" };
 	}
 
 	bool Function::call(RegisterCommand command, sols::ParseMessage retMsg, const std::string &name)
 	{
-		const std::string &functionContent = this->get(name);
+		const std::string &functionContent = this->get(name).second;
+		ciof::print(functionContent);
 
 		if (functionContent.empty())
 			return false;
 
-		ciof::print(this->parser->input.substr(retMsg.lineRange.first, retMsg.lineRange.second));
+		ciof::print(functionContent);
 		ciof::print("\n\n\n");
 
 		this->parser->input.replace(

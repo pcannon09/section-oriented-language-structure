@@ -12,6 +12,9 @@ namespace sols::defcommands
 {
 	namespace _utils
 	{
+		std::pair<int, int> getStartEnd(const RegisterCommand &command);
+		std::pair<int, int> getStartEndContent(const RegisterCommand &command);
+
 		std::string parseNonRawString(
 				const std::string &str,
 				const std::map<std::string, std::string> &replacement

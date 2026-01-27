@@ -174,6 +174,7 @@ namespace sols
 				sols::FunctionProps prop;
 				prop.name = commandRet.message; // Function name
 				prop.content = content; // Inner function comment
+				prop.innerContent = commandRet.message;
 
 				this->function->declare(prop);
 
@@ -257,6 +258,7 @@ namespace sols
 		commandSend.posStart = sectionStart;
 		commandSend.node = node;
 		commandSend.function = this->function;
+		commandSend.file = this->input;
 
 		const RegisteredName &regName = this->getNameBySyntax(node.name);
 		ParseMessage commandCall = __SOLS_PARSER_COMMAND_CALL(regName);
@@ -328,6 +330,7 @@ namespace sols
 
 		commandSend.node = node;
 		commandSend.function = this->function;
+		commandSend.file = this->input;
 
 		// Run again if the command call needs to be executed again;
 		// 	* Developer can disable it when developing the software with SOLS

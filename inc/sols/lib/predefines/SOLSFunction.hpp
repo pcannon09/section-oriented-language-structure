@@ -12,6 +12,7 @@ namespace sols
 	{
 		std::string name;
 		std::string content;
+		std::string innerContent;
 	} FunctionProps;
 
 	class Function
@@ -35,7 +36,8 @@ namespace sols
 
 		bool call(RegisterCommand command, sols::ParseMessage retMsg, const std::string &name);
 
-		std::string get(const std::string &name);
+		std::pair<std::string, std::string> get(const std::string &name);
+
 		std::string getFull(const std::string &name);
 	};
 }
