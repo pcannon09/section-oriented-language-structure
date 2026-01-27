@@ -4,6 +4,7 @@
 	<command>
 		echo "wassup"
 	</command>
-
 </function>
+
+<call I_Name = "sayHello"></call>
 
