@@ -55,21 +55,15 @@ namespace sols
 	bool Function::call(RegisterCommand command, sols::ParseMessage retMsg, const std::string &name)
 	{
 		const std::string &functionContent = this->get(name).second;
-		ciof::print(functionContent);
 
 		if (functionContent.empty())
 			return false;
-
-		ciof::print(functionContent);
-		ciof::print("\n\n\n");
 
 		this->parser->input.replace(
 				retMsg.lineRange.first,
 				retMsg.lineRange.second,
 				functionContent
 				);
-
-		ciof::print(this->parser->input);
 
 		return true;
 	}
