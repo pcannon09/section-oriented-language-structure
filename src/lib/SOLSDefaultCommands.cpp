@@ -52,18 +52,19 @@ namespace sols::defcommands
 			const std::string &closeTag = ciof::format("</%1%%2", command.commandName, ">");
 
 			// Find opening tag
-			const size_t &start = command.file.find(openTag) + openTag.size();
+			const size_t &start = command.file.find(openTag);
+			const size_t &startOfEnd = command.file.find('>', start);
 
 			if (start == std::string::npos)
 				return { -1, -1 };
 
 			// Find closing tag after opening
-			size_t end = command.file.find(closeTag, start);
+			size_t end = command.file.find(closeTag, start) - closeTag.size();
 
 			if (end != std::string::npos) end += closeTag.size() - 1;
 			else end = command.file.size(); // Remove until EOF
 
-			return { start, end };
+			return { start + startOfEnd, end - start - startOfEnd};
 		}
 
 		std::string parseNonRawString(
@@ -242,7 +243,7 @@ namespace sols::defcommands
 		std::pair<int, int> range = _utils::getStartEnd(command);
 
 		pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
-		pmsg.lineRange = { range.first, range.second};
+		pmsg.lineRange = range;
 
 		std::ifstream fileContent(args[0]);
 
@@ -291,9 +292,8 @@ namespace sols::defcommands
 		sols::RegisteredName name;
 
 		const std::pair<int, int> &range = _utils::getStartEndContent(command);
-		ciof::print(command.file.substr(range.first, range.second));
 
-		pmsg.lineRange = { range.first, range.second };
+		pmsg.lineRange = range;
 		pmsg.command = SOLS_EXECCOMMAND_RETACTION_DECLFUNCTION;
 		pmsg.message = idAccess;
 
@@ -357,7 +357,7 @@ namespace sols::defcommands
 		std::pair<int, int> range = _utils::getStartEnd(command);
 
 		pmsg.command = SOLS_EXECCOMMAND_RETACTION_REPLACELINES;
-		pmsg.lineRange = { range.first, range.second };
+		pmsg.lineRange = range;
 		pmsg.message = "";
 
 		return pmsg;
