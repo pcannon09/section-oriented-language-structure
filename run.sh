@@ -9,7 +9,7 @@ PROJECT_INFO_PATH=".private/project.json"
 
 projectName=$(jq -r '.exeName' $PROJECT_INFO_PATH)
 
-readonly LICENSE="SOLS (C) 2025  pcannon09
+readonly LICENSE="SOLS (C) 2025 - 2026 pcannon09
 This program comes with ABSOLUTELY NO WARRANTY; for details type \`./run.sh --license\`.
 This is free software, and you are welcome to redistribute it
 under certain conditions; type \`./run.sh --license\` for details."
