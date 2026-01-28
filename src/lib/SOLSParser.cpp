@@ -168,22 +168,20 @@ namespace sols
 			{
 				const std::string content = this->input.substr(
 					commandRet.lineRange.first,
-					commandRet.lineRange.second - commandRet.lineRange.first
+					commandRet.lineRange.second
 				);
 
 				sols::FunctionProps prop;
 				prop.name = commandRet.message; // Function name
 				prop.content = content; // Inner function comment
-				prop.innerContent = commandRet.message;
+				prop.innerContent = content;
 
 				this->function->declare(prop);
 
 				// Erase the needed //
 
-				this->input.erase(
-					commandRet.lineRange.first,
-					commandRet.lineRange.second - commandRet.lineRange.first
-				);
+				this->input.erase(this->input.find(content), content.size());
+				ciof::print(this->input);
 
 				this->pos = commandRet.lineRange.first;
 				this->parseElem();
